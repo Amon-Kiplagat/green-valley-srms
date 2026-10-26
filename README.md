@@ -38,11 +38,15 @@ green_valley_srms_html_pages/   (this folder = your web root)
 │   └── database.php         # PDO + PostgreSQL connection (reads .env)
 │
 ├── includes/
-│   ├── auth.php             # sessions, login state, role checks
-│   ├── functions.php        # helpers: escaping, grade calc, CSRF, flash messages
+│   ├── auth.php             # sessions, login state, role checks (staff + student)
+│   ├── functions.php        # helpers: escaping, grade calc, CSRF, flash messages, logos
 │   ├── header.php           # shared page head + topbar (opens .main)
 │   ├── sidebar.php          # shared navigation menu
-│   └── footer.php           # shared page footer (loads script.js)
+│   ├── footer.php           # shared page footer (loads script.js)
+│   ├── report_header.php    # report card letterhead: crest | school name | second logo
+│   ├── portal_header.php    # student portal page head, top bar and tabs (opens .main)
+│   ├── portal_footer.php    # student portal page footer (loads script.js)
+│   └── student_portal.php   # student login rules: lockout, password rules, slip passwords
 │
 ├── actions/                 # form handlers (POST targets) — one per entity
 │   ├── student_actions.php
@@ -50,7 +54,8 @@ green_valley_srms_html_pages/   (this folder = your web root)
 │   ├── class_actions.php
 │   ├── subject_actions.php
 │   ├── exam_actions.php
-│   └── result_actions.php
+│   ├── result_actions.php
+│   └── user_actions.php     # approve / deactivate / delete login accounts (admin)
 │
 ├── css/
 │   └── style.css            # all styling
@@ -61,7 +66,16 @@ green_valley_srms_html_pages/   (this folder = your web root)
 │
 ├── sql/
 │   ├── schema.sql           # creates the 7 tables, constraints and indexes
-│   └── seed.sql             # optional sample data (incl. login accounts)
+│   ├── seed.sql             # optional sample data (incl. login accounts)
+│   ├── migration_2026_10_activity_log_and_phone.sql   # adds activity_log + phone columns
+│   ├── migration_2026_10_teacher_signup.sql           # adds users.email / users.phone (teacher sign-up)
+│   ├── migration_2026_10_student_remarks.sql          # adds students.class_teacher_remark / subject_teacher_remark
+│   ├── migration_2026_10_student_portal.sql           # adds the student portal login columns
+│   └── migration_2026_10_student_portal_security.sql  # adds lockout + "choose your own password" columns
+│
+├── images/
+│   └── branding/            # drop school-logo.png (+ optional secondary-logo.png) here
+│       └── README.txt       #   for the report card letterhead (see §10)
 │
 │   # --- Progressive Web App (mobile + offline) ---
 ├── manifest.webmanifest     # installable-app metadata (name, icons, colours)
@@ -77,11 +91,13 @@ green_valley_srms_html_pages/   (this folder = your web root)
 │   # --- Python analytics (server-side, run from a terminal) ---
 ├── tools/
 │   ├── analytics.py         # exam analytics → PDF + CSV (reads existing tables)
+│   ├── report_card.py       # one student's report card → branded PDF (used by report_pdf.php)
 │   └── requirements.txt     # Python dependencies (psycopg2 + reportlab)
 ├── exports/                 # generated reports land here (created automatically)
 │
 ├── index.php                # entry point → redirects to dashboard or login
 ├── login.php                # login page  (replaces login.html)
+├── signup.php               # teacher self-service sign-up (creates an account pending admin approval)
 ├── logout.php               # ends the session
 ├── dashboard.php            # dashboard  (replaces dashboard.html)
 ├── students.php             # students    (replaces students.html)
@@ -91,6 +107,17 @@ green_valley_srms_html_pages/   (this folder = your web root)
 ├── exams.php                # exams       (replaces exams.html)
 ├── results.php              # marks entry (new — the results interface)
 ├── reports.php              # reports     (replaces reports.html)
+├── report_pdf.php           # streams a student report card as a PDF (runs tools/report_card.py)
+├── users.php                # Accounts: admin approves/manages login accounts
+├── portal_accounts.php      # Student Portal: set up a class, print login slips, unlock (admin)
+│
+│   # --- Student portal (students see only their own results, see §13) ---
+├── student_login.php        # student sign-in (separate from the staff login)
+├── student_home.php         # "Overview": latest exam at a glance, recent exams
+├── student_results.php      # "My Results": the student's own report + PDF download
+├── student_profile.php      # "Profile": their class, teachers, guardian, account
+├── student_password.php     # student changes their password (forced at first sign-in)
+│
 └── create_admin.php         # one-off utility to create/reset a login (DELETE after use)
 ```
 
@@ -188,6 +215,43 @@ converting `+254…` to `0…`), then adds the `CHECK` constraints as `NOT VALID
 unusual legacy number cannot make the migration fail. The comments at the bottom of that
 file show how to list any leftovers and finish validating once they are fixed.
 
+To enable **teacher self-service sign-up** (see §5) on an existing database, also run:
+
+```bash
+psql -h localhost -U mole -d green_valley -f sql/migration_2026_10_teacher_signup.sql
+```
+
+This adds `users.email` and `users.phone` (so a teacher's own contact details, captured at
+sign-up, are visible to the admin at approval time) plus a small index for fast
+"pending approval" look-ups. It is additive, changes no existing data, and is safe to
+re-run.
+
+To enable **teacher remarks on report cards** (see §10) on an existing database, also run:
+
+```bash
+psql -h localhost -U mole -d green_valley -f sql/migration_2026_10_student_remarks.sql
+```
+
+This adds two free-text columns, `students.class_teacher_remark` and
+`students.subject_teacher_remark`, which hold the overall (per-student) comments shown on
+every report card. It is additive, changes no existing data, and is safe to re-run.
+
+To enable the **student portal** (see §13) on an existing database, run these two, **in
+this order**:
+
+```bash
+psql -h localhost -U mole -d green_valley -f sql/migration_2026_10_student_portal.sql
+psql -h localhost -U mole -d green_valley -f sql/migration_2026_10_student_portal_security.sql
+```
+
+The first adds the login columns (`portal_username`, `portal_password_hash`,
+`portal_enabled`, plus a case-insensitive unique index on the username). The second adds
+`portal_must_change`, `portal_failed_attempts`, `portal_locked_until` and
+`portal_last_login`, which drive the "choose your own password" step and the sign-in
+lockout. Both are additive, change no existing data, and are safe to re-run. Run them
+**before** you start using the updated pages — the Students page, the student sign-in and
+the Student Portal page all read these columns.
+
 ---
 
 ## 3. Configure the connection
@@ -208,6 +272,14 @@ DB_NAME=green_valley
 DB_USER=mole
 DB_PASS=your_real_password_here
 APP_ENV=development
+
+# Optional: interpreter used to generate PDF report cards (see §10).
+# Defaults to "python3"; set this if your reportlab/psycopg2 live in a venv.
+# PYTHON_BIN=/path/to/venv/bin/python
+
+# Optional: the student sign-in address printed on login slips (see §13).
+# Left unset, the slips show the address the admin opened the page on.
+# PORTAL_URL=https://records.greenvalley.sc.ke/student_login.php
 ```
 
 `config/database.php` loads this file and creates a single PDO connection configured for:
@@ -266,6 +338,27 @@ Or in a browser, visit `create_admin.php?setup=1` once to create the default `ad
 account. **Delete `create_admin.php` from the server as soon as you are done** — leaving
 it in place is a security risk.
 
+### Teacher self-service sign-up (needs admin approval)
+
+Teachers can request their own account from the login page via the **"Create an account"**
+link, which opens `signup.php`. They enter their name, a username and password, and
+optionally an email, phone and the staff number the school issued them (if the staff number
+matches an unlinked `teachers` record, the login is linked to it automatically).
+
+The key safeguard: a new sign-up is created with **`is_active = FALSE`, so it cannot sign in
+yet**. Because these accounts can see student records, an administrator must approve each
+one first. Approvals happen on the new **Accounts** page (`users.php`, admin-only, under
+*Administration* in the sidebar):
+
+- **Pending approval & inactive** lists new sign-ups. Click **Approve** to activate the
+  account (the teacher can then log in), or **Delete** to reject it.
+- **Active accounts** lets an admin **Deactivate** (revoke sign-in) or **Delete** an account.
+
+To prevent anyone locking the whole school out, you cannot deactivate or delete your own
+account, nor the last remaining active administrator. Every sign-up, approval,
+deactivation and deletion is written to the activity log (§11). Requires the
+`migration_2026_10_teacher_signup.sql` migration (§2).
+
 ---
 
 ## 6. Who can do what (roles)
@@ -273,10 +366,13 @@ it in place is a security risk.
 The system has two roles, checked on every page and every action:
 
 - **Admin** — full access: add/edit/delete students, teachers, classes, subjects, exams;
-  enter and edit marks; view all reports; delete records.
+  enter and edit marks; view all reports; delete records. Admins also review teacher
+  sign-ups and manage login accounts on the **Accounts** page (`users.php`).
 - **Teacher** — can view all records, manage students, and enter/edit marks. Managing
   teachers, classes, subjects and exams, and *all* delete operations, are restricted to
   admins.
+- **Student** — signs in on the separate student portal (§13) and can only ever see their
+  **own** results and report card. A student session can never open a staff page.
 
 Anyone who is not logged in is redirected to the login page — no page can be reached by
 typing its URL directly without a session.
@@ -299,7 +395,9 @@ typing its URL directly without a session.
 - **Output escaping** — all database values are printed through `htmlspecialchars()`
   (the `e()` helper) to prevent cross-site scripting.
 - **Role-based authorization** — `require_login()` and `require_role('admin')` guard the
-  pages and actions.
+  pages and actions; `require_student()` guards the student portal.
+- **Student portal lockout** — 5 wrong passwords in a row lock a student login for 15
+  minutes, and a password the school set must be replaced at the first sign-in (§13).
 - **Credentials in `.env` only** — never in HTML, JavaScript, or committed source.
 
 ---
@@ -405,9 +503,255 @@ Reports are written to the `exports/` folder, e.g. `exports/analytics_all_202610
 Grades use exactly the same bands as the app (`includes/functions.php`), so the Python
 report and the on-screen report cards always agree.
 
+### Downloadable student report cards (PDF, from the browser)
+
+Unlike the analytics tool above, this one is wired straight into the web app. On the
+**Reports** page, after you generate a student's report, a **Download PDF** button sits
+next to **Print Report**. It produces a branded, pine-and-gold report card as a proper PDF —
+the same student header, subject marks and grades, total, average, mean grade and position
+in class that the page shows.
+
+How it fits together:
+
+- `tools/report_card.py` is the generator. It reuses the shared helpers in `analytics.py`
+  (grade bands, `.env` loading, brand colours), computes one student's card live from the
+  database, and renders it with reportlab. It can also run standalone:
+
+  ```bash
+  python3 tools/report_card.py --student 1 --exam 2    # writes exports/report_card_…pdf
+  python3 tools/report_card.py --student 1             # all examinations
+  python3 tools/report_card.py --self-test             # sample card, no database
+  ```
+
+- `report_pdf.php` is the browser endpoint. It checks the user is logged in, then runs the
+  Python generator with `--stdout` using `proc_open()` with an **argument array** (no shell,
+  so the ids can't be used for injection) and streams the PDF straight to the browser as a
+  download. The interpreter is `python3` by default, or whatever you set as `PYTHON_BIN` in
+  `.env` (handy if reportlab/psycopg2 live in a virtualenv). Each download is recorded in the
+  activity log (§11).
+
+Dependencies are the same `tools/requirements.txt` as above (`psycopg2` + `reportlab`), so
+if the analytics tool runs, report-card downloads will too.
+
+### School logos on the report card
+
+Every report card has a letterhead: the **school crest** on the left, the school name in
+the middle, and an optional **second logo** on the right (for example the Ministry of
+Education, or a sponsor). It appears in all three views — on screen (Reports page and the
+student portal), in print, and in the PDF.
+
+To use your own logos, drop image files into `images/branding/`:
+
+| File                 | Shown          | If the file is missing |
+|----------------------|----------------|------------------------|
+| `school-logo.png`    | top-left       | the app's GV mark (`icons/icon-512.png`) is used |
+| `secondary-logo.png` | top-right      | the slot stays empty; the school name stays centred |
+
+`.jpg` / `.jpeg` work too (e.g. `school-logo.jpg`). A roughly square image of 400–800 px
+with a transparent background looks best; a non-square logo is scaled to fit, never
+stretched, and large files are shrunk for the PDF automatically. The crest is also printed
+on the student portal login slips (§13).
+
+No restart or code change is needed. Logo addresses carry a version stamp taken from the
+file's modification time, so a replaced logo shows up on the next page load — even in the
+installed app, whose offline cache would otherwise keep the old picture. PHP
+(`report_logos()` in `includes/functions.php`) and Python (`report_logos()` in
+`tools/report_card.py`) look for the same file names; keep them in step if you change
+them. An unreadable image never breaks a download: the PDF is built without it and a
+warning is written to the PHP error log.
+
+### Teacher remarks on the report card
+
+Each student record carries two optional, overall (per-student) remarks — a **Class
+Teacher's remark** and a **Subject Teacher's remark** — entered on the student's add/edit
+form (`students.php`). They are not tied to a single exam; they are the general comments
+that belong on the report card.
+
+Once saved, they appear in all three views of the report, which always stay in step because
+they read the same two columns:
+
+- **on screen** — a *Remarks* block under the marks table on the Reports page (`reports.php`);
+- **in print** — the same block is part of the printable report (Print Report);
+- **in the PDF** — a *Remarks* section on the downloaded card (`tools/report_card.py`);
+- **in the student portal** — the same block under the marks on *My Results*
+  (`student_results.php`), so the student reads what their teachers wrote.
+
+When a remark is blank, the report prints a **ruled line** in its place, so the class or
+subject teacher can fill it in by hand on a printed copy. The fields are free text, capped
+at 500 characters on save to keep the card tidy, and stored in `TEXT` columns added by
+`sql/migration_2026_10_student_remarks.sql` (see §2). Teachers as well as admins can edit
+them, since both roles manage student records.
+
 ---
 
-## 11. Troubleshooting
+## 11. System activity log (who was last in, and what they did)
+
+The dashboard carries a **System Activity** card. At the top it answers the question
+"who was last in the system?" — the most recent person, their role, what they did, and how
+long ago — and below it a short table lists the latest actions across the whole app.
+
+Every action is recorded in a dedicated `activity_log` table:
+
+- **Sessions** — successful sign-ins, sign-outs, and *failed* sign-in attempts (the
+  username that was tried is recorded even though no session was created).
+- **Records** — every add, edit and delete of a student, teacher, class, subject, exam or
+  set of marks. Deletes capture the record's name *before* it is removed, so the trail
+  still reads "Deleted Student — Mary Wanjiku (GV001)" rather than a blank.
+
+Each row stores *who* (user id, username, full name and role), *what* (a short action verb,
+the entity type, and a human-readable label), *when* (`created_at`), and the caller's IP
+address. The who/what columns are **denormalised on purpose** — the username, full name and
+role are copied into the row at the time of the action, so the history still reads correctly
+even if that user account is later renamed or deleted.
+
+Logging is best-effort and never gets in the user's way: `log_activity()` in
+`includes/functions.php` wraps the whole insert in a `try/catch`, so if the audit write ever
+fails (for example, the table has not been created yet) the user's save still succeeds and
+the app simply carries on without that one trail entry.
+
+> **Upgrading?** The `activity_log` table ships in `schema.sql`, but if you already have a
+> live database, add it with the migration in section 2
+> (`sql/migration_2026_10_activity_log_and_phone.sql`). Until then the dashboard shows a
+> short note telling you to run it, rather than erroring.
+
+---
+
+## 12. Phone numbers: digits only
+
+Both the **parent/guardian phone** (students) and the **teacher phone** fields accept a
+phone number and **nothing else** — no names, notes, or stray letters can be saved in them.
+The field is optional, so it may be left blank, but if something is entered it must be a
+valid Kenyan mobile number.
+
+While typing you may use the familiar separators — spaces, dashes, dots and brackets — and
+any of the usual ways of writing the country code. Whatever you enter is **normalised to one
+canonical 10-digit local form** before it is stored:
+
+| You type | What is stored |
+|----------|----------------|
+| `0712345678`        | `0712345678` |
+| `0712 345 678`      | `0712345678` |
+| `+254 712 345 678`  | `0712345678` |
+| `254712345678`      | `0712345678` |
+| `00254712345678`    | `0712345678` |
+| `712345678`         | `0712345678` |
+
+Valid numbers are ten digits beginning `07` or `01` (the Safaricom/Airtel `7xx` and the newer
+`1xx` ranges). Anything else — letters, a `+` in the wrong place, a wrong country code, too
+many or too few digits — is rejected with a clear message, and the record is not saved.
+
+The rule is enforced in **three layers**, each a safety net for the one before it:
+
+1. **JavaScript** (`js/script.js`) cleans the field as you type and flags a bad number before
+   the form is submitted — convenience only.
+2. **PHP** (`normalize_phone()` in `includes/functions.php`) is the authoritative check: it
+   runs on the server for every save and decides the exact value that gets stored. The
+   client-side check can be bypassed; this one cannot.
+3. **PostgreSQL** (`CHECK (… ~ '^0[71][0-9]{8}$')` on `students.guardian_phone` and
+   `teachers.phone`) is the last line of defence, so the database itself refuses to hold a
+   malformed number no matter how a write reaches it.
+
+Because PHP always normalises to the same `0…` shape the database expects, anything the app
+accepts the database accepts too — the three layers can never disagree.
+
+---
+
+## 13. Student portal (students see their own results)
+
+Students have their own sign-in page, **`student_login.php`** (linked from the staff login
+as *"Student? View your results"*). Once signed in they land on the portal, which has three
+tabs along the top, on the same page on a phone as on a desktop:
+
+- **Overview** (`student_home.php`) — their latest examination at a glance: average, mean
+  grade and position in class, how that average compares with the examination before it,
+  and a short list of recent examinations, each linking to its marks. It ends with their
+  portal account (sign-in name, last sign-in).
+- **My Results** (`student_results.php`) — the full report: their own marks, total,
+  average, mean grade, position in class and teacher remarks, with an examination filter
+  and **Download PDF** and **Print Report**. This is the same report card the staff Reports
+  page produces, letterhead included.
+- **Profile** (`student_profile.php`) — read-only: name, admission number, gender, date of
+  birth, class and class teacher, the subjects they take with each subject's teacher, their
+  parent/guardian's name and phone, and their portal account.
+
+Every query is built from the student id held in the session, so editing the URL can never
+reveal another student's results, and a student session can never open a staff page. The
+shared top bar (`includes/portal_header.php`) offers **Change password** and **Sign out**
+on every tab, and re-checks the student's access on each page: an admin switching a login
+off ends the session at the student's next click, wherever they are.
+
+Students cannot create their own accounts; an admin sets them up.
+
+Needs both student portal migrations (§2).
+
+### Setting up a whole class (login slips)
+
+**Administration → Student Portal** (`portal_accounts.php`, admins only):
+
+1. Choose the class and click **Create missing logins**.
+2. Every student in the class without a login gets one: the **username is their admission
+   number** (characters other than letters, digits, `.`, `-` and `_` become `-`, so
+   `GV/2024/001` becomes `GV-2024-001`), and the password is a random 8-character one
+   with no look-alike characters (no `0`/`O`, `1`/`l`).
+3. The next page shows one **login slip** per student — crest, name, admission number,
+   class, username, password and the sign-in address. Click **Print slips**, cut along
+   the dashed lines and hand them out.
+
+The passwords are shown **only once**. Only their hashes are stored, they never appear in a
+URL, and the page is sent with `Cache-Control: no-store`, so neither the browser nor the
+offline cache keeps a copy. Reloading or going back cannot show them again (the form uses a
+one-time token, so it also cannot reset the class twice by accident). If slips are lost,
+choose the class again and use **Reset all passwords**, which gives everyone in the class a
+new password and slip — or reset a single student from the Students page. Either way the
+new password must be at least 8 characters, the same minimum the student meets when they
+choose their own.
+
+Students who already have a login are left alone by *Create missing logins*. Students whose
+access an admin has switched off stay off, even with *Reset all passwords*. A student is
+skipped, with the reason listed, if their admission number is too short to use or the
+username is already taken by someone else; set those up one at a time on the Students page.
+Students with no class are set up there too.
+
+The address on the slips is the one the admin opened the page with. If students reach the
+server by a different name (for example, the admin uses `localhost`), set `PORTAL_URL` in
+`.env` (§3).
+
+### First sign-in: students choose their own password
+
+A password set by the school — on a slip, or typed by an admin on the Students page — only
+works until the student's first sign-in. They are taken straight to
+**`student_password.php`** and cannot see their results until they have chosen their own
+(at least 8 characters, and different from the one on the slip). So a slip that has been
+used is worthless to anyone who finds it. Students can change their password again at any
+time with **Change password** in the portal top bar; they must enter their current one
+first.
+
+When an admin sets a password on the Students page, the box *"Ask the student to choose
+their own password at next sign-in"* is ticked by default. Untick it only if the student
+chose the password themselves.
+
+### Lockout after wrong passwords
+
+**5 wrong passwords in a row lock a student login for 15 minutes.** While it is locked the
+password is not even checked, so guessing gets nowhere, and the student is told how many
+minutes are left. Each lockout is written to the activity log (§11) as *Locked — Student
+portal*, so admins can see that someone was guessing. Wrong *current* passwords on the
+change-password page count too, and reaching the limit there signs the student out.
+
+To let a student back in early, either click **Unlock** under *Locked accounts* on the
+Student Portal page, or save their portal login on the Students page (saving always clears
+a lockout). If someone else was guessing, reset the student's password instead. The
+Students list marks locked logins with a red **Locked** pill, and the student's edit page
+shows their last sign-in and whether they still have to choose a password.
+
+Because usernames are admission numbers, the lockout message does reveal that a username
+exists. That is deliberate: admission numbers are not secret in a school, and telling the
+student why they cannot sign in saves a trip to the office. The limits live at the top of
+`includes/student_portal.php` (`PORTAL_MAX_ATTEMPTS`, `PORTAL_LOCK_MINUTES`).
+
+---
+
+## 14. Troubleshooting
 
 - **"could not find driver"** — the `pdo_pgsql` PHP extension is not enabled. Enable it in
   `php.ini` and restart.
@@ -423,3 +767,24 @@ report and the on-screen report cards always agree.
   error, and note iPhone installs via **Share → Add to Home Screen** rather than a button.
 - **`python3 tools/analytics.py` says "No PostgreSQL driver found"** — install the
   dependencies first with `pip install -r tools/requirements.txt` (see section 10).
+- **The dashboard says the activity log table has not been created** — you are on an older
+  database. Run `sql/migration_2026_10_activity_log_and_phone.sql` (see section 2) to add
+  the `activity_log` table; the card starts filling in from the next sign-in.
+- **"Phone number may contain digits only…" when saving a student or teacher** — the field
+  takes a Kenyan mobile number and nothing else: ten digits starting `07` or `01`, or the
+  `+254` form (see section 12). Remove any letters or notes, or leave it blank. If an *old*
+  record refuses to save after upgrading, its stored number predates the rule — re-enter it
+  in the valid form.
+- **"column portal_must_change does not exist"** (or another `portal_…` column), or the
+  Students page / student sign-in shows a database error after upgrading — the student
+  portal migrations have not been run. Run both, in order (see section 2).
+- **A student says their slip password does not work** — it only works until their first
+  sign-in, after which they must use the password they chose. If they have forgotten it,
+  set a new one on the Students page (or *Reset all passwords* for the class). If they see
+  "locked for N more minutes", wait or click **Unlock** on the Student Portal page.
+- **The sign-in address on the slips is wrong** (e.g. shows `localhost`) — set
+  `PORTAL_URL` in `.env` to the address students should use (see sections 3 and 13).
+- **A new logo does not show** — check the exact file name and folder
+  (`images/branding/school-logo.png`), then reload the page. If the PDF still shows the GV
+  mark, look in the PHP error log for a `skipping logo` warning — the file is probably not
+  a real PNG/JPEG (e.g. a renamed `.webp` or `.svg`).

@@ -1,0 +1,16 @@
+# Environment and secrets
+.env
+
+# IDE configuration
+.idea/
+*.iml
+
+# Junie assistant files
+.junie/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
