@@ -372,9 +372,18 @@ $error = '';
       </div>
 
       <?php foreach ($flashes as $f): ?>
-          <div class="bento-alert <?= $f['type'] === 'success' ? 'bento-alert-success' : 'bento-alert-error' ?>">
-              <?= e($f['message']) ?>
-          </div>
+          <?php if ($f['type'] === 'info' && filter_var($f['message'], FILTER_VALIDATE_URL)): ?>
+              <div class="bento-alert bento-alert-success" style="word-break:break-all;">
+                  <strong>Reset link (copy and open in your browser):</strong><br>
+                  <input type="text" value="<?= e($f['message']) ?>" readonly
+                         style="width:100%;margin-top:6px;padding:8px;border:1.5px solid #e2e8f0;border-radius:8px;font-size:0.8rem;background:#f8fafc;"
+                         onclick="this.select();this.focus();">
+              </div>
+          <?php elseif ($f['type'] === 'success'): ?>
+              <div class="bento-alert bento-alert-success"><?= e($f['message']) ?></div>
+          <?php else: ?>
+              <div class="bento-alert bento-alert-error"><?= e($f['message']) ?></div>
+          <?php endif; ?>
       <?php endforeach; ?>
 
       <?php if ($error !== ''): ?>

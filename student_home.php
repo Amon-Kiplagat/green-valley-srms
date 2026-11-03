@@ -19,11 +19,11 @@ if (!empty($_SESSION['portal_must_change'])) {
 
 $pdo = db();
 $stmt = $pdo->prepare(
-    'SELECT s.full_name, s.admission_no, c.class_name, c.set_teacher_id,
+    'SELECT s.full_name, s.admission_no, c.class_name, c.teacher_id,
             t.full_name AS teacher_name
        FROM students s
        JOIN classes c ON c.class_id = s.class_id
-       LEFT JOIN teachers t ON t.teacher_id = c.set_teacher_id
+       LEFT JOIN teachers t ON t.teacher_id = c.teacher_id
       WHERE s.student_id = :id'
 );
 $stmt->execute([':id' => $_SESSION['student_id']]);

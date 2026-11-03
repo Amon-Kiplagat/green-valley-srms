@@ -91,7 +91,15 @@ CREATE TABLE students (
     -- constraint guarantees nothing else can ever reach the column.
     guardian_phone VARCHAR(20)
                    CHECK (guardian_phone IS NULL OR guardian_phone ~ '^0[71][0-9]{8}$'),
-    created_at     TIMESTAMPTZ  NOT NULL DEFAULT NOW()
+    -- Student portal authentication columns.
+    portal_username      VARCHAR(60) UNIQUE,
+    portal_password_hash VARCHAR(255),
+    portal_enabled       BOOLEAN      NOT NULL DEFAULT FALSE,
+    portal_must_change   BOOLEAN      NOT NULL DEFAULT TRUE,
+    portal_failed_attempts INTEGER    NOT NULL DEFAULT 0,
+    portal_locked_until  TIMESTAMPTZ,
+    portal_last_login    TIMESTAMPTZ,
+    created_at           TIMESTAMPTZ  NOT NULL DEFAULT NOW()
 );
 
 -- ----------------------------------------------------------------------------
@@ -134,6 +142,8 @@ CREATE TABLE results (
     marks      NUMERIC(5,2) NOT NULL
                CHECK (marks >= 0 AND marks <= 100),
     grade      VARCHAR(3)   NOT NULL,
+    class_teacher_remark    VARCHAR(255),
+    subject_teacher_remark  VARCHAR(255),
     created_at TIMESTAMPTZ  NOT NULL DEFAULT NOW(),
     CONSTRAINT uq_result UNIQUE (student_id, subject_id, exam_id)
 );
@@ -159,6 +169,7 @@ CREATE TABLE activity_log (
     entity       VARCHAR(40),                      -- 'Student', 'Marks', 'Session'...
     entity_label VARCHAR(160),                     -- 'Mary Wanjiku (GV001)'
     ip_address   VARCHAR(45),                      -- 45 chars fits IPv6
+    detail       JSONB,                            -- structured extra data
     created_at   TIMESTAMPTZ  NOT NULL DEFAULT NOW()
 );
 
@@ -167,6 +178,8 @@ CREATE TABLE activity_log (
 -- ----------------------------------------------------------------------------
 CREATE INDEX idx_students_class    ON students(class_id);
 CREATE INDEX idx_students_name     ON students(full_name);
+CREATE INDEX idx_students_portal   ON students (lower(portal_username) text_pattern_ops)
+    WHERE portal_username IS NOT NULL;
 CREATE INDEX idx_classes_teacher   ON classes(teacher_id);
 CREATE INDEX idx_subjects_teacher  ON subjects(teacher_id);
 CREATE INDEX idx_results_student   ON results(student_id);

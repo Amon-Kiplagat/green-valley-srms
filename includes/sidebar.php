@@ -20,6 +20,7 @@ $navClass = static function (string $file) use ($current): string {
 $navIcon = static function (string $key): string {
     $icons = [
         'dashboard' => 'fa-solid fa-table-columns',
+        'profile'   => 'fa-solid fa-user-gear',
         'students'  => 'fa-solid fa-user-graduate',
         'teachers'  => 'fa-solid fa-chalkboard-user',
         'classes'   => 'fa-solid fa-school',
@@ -37,6 +38,7 @@ $navIcon = static function (string $key): string {
 $navGroups = [
     'Overview' => [
         'dashboard.php' => ['Dashboard', 'dashboard'],
+        'profile.php'   => ['Profile', 'profile'],
     ],
     'Records' => [
         'students.php'         => ['Students', 'students'],
@@ -53,8 +55,14 @@ $navGroups = [
 ];
 
 $loggedIn = function_exists('is_logged_in') && is_logged_in();
-$userName = $_SESSION['full_name'] ?? $_SESSION['username'] ?? 'User';
-$userRole = function_exists('current_role') ? (string)(current_role() ?? '') : '';
+$isStudent = function_exists('is_student') && is_student();
+$hasSession = $loggedIn || $isStudent;
+$userName = $loggedIn
+    ? ($_SESSION['full_name'] ?? $_SESSION['username'] ?? 'User')
+    : ($isStudent ? ($_SESSION['student_name'] ?? 'Student') : 'User');
+$userRole = $loggedIn
+    ? (function_exists('current_role') ? (string)(current_role() ?? '') : '')
+    : ($isStudent ? 'Student' : '');
 ?>
 <aside class="sidebar" id="sidebar">
     <div class="brand">
@@ -75,7 +83,7 @@ $userRole = function_exists('current_role') ? (string)(current_role() ?? '') : '
         <?php endforeach; ?>
     </nav>
 
-    <?php if ($loggedIn): ?>
+    <?php if ($hasSession): ?>
         <div class="side-foot">
             <div class="side-user">
                 <b><?= e($userName) ?></b>

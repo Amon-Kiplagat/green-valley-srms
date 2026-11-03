@@ -7,6 +7,9 @@
 --      username: admin    password: admin123     role: admin
 --      username: teacher  password: teacher123   role: teacher
 --
+--  Student portal accounts (default password: student123 — must change on first login):
+--      mary.w   peter.k   faith.a   brian.k
+--
 --  IMPORTANT: change these passwords after first login (or create fresh users
 --  with create_admin.php, which hashes with PHP's password_hash()).
 --  The password_hash values below are real bcrypt hashes ($2y$) produced the
@@ -42,12 +45,21 @@ INSERT INTO classes (class_name, teacher_id, room) VALUES
     ('Form 4 South', 4, 'Rm 12');
 
 -- ---- Students (class_id references classes) -------------------------------
+-- Portal credentials (default password: student123 — change on first login):
+--   GV001 → username: mary.w   GV002 → username: peter.k
+--   GV003 → username: faith.a  GV004 → username: brian.k
+-- The password_hash below is a real bcrypt hash of 'student123'.
 INSERT INTO students
-    (admission_no, full_name, gender, date_of_birth, class_id, guardian_name, guardian_phone) VALUES
-    ('GV001', 'Mary Wanjiku', 'Female', '2010-03-14', 2, 'Samuel Wanjiku', '0712345678'),
-    ('GV002', 'Peter Kamau',  'Male',   '2009-07-22', 3, 'Alice Kamau',    '0723456789'),
-    ('GV003', 'Faith Achieng','Female', '2011-01-09', 1, 'Joseph Achieng', '0734567890'),
-    ('GV004', 'Brian Kiptoo', 'Male',   '2008-11-30', 4, 'Nancy Kiptoo',   '0745678901');
+    (admission_no, full_name, gender, date_of_birth, class_id, guardian_name, guardian_phone,
+     portal_username, portal_password_hash, portal_enabled, portal_must_change) VALUES
+    ('GV001', 'Mary Wanjiku', 'Female', '2010-03-14', 2, 'Samuel Wanjiku', '0712345678',
+     'mary.w', '$2y$12$gE6Dn7YW1htwmNRcag1NLuEyxb9FXOM2.KLNGfhVgPkV86xLHXmjW', TRUE, TRUE),
+    ('GV002', 'Peter Kamau',  'Male',   '2009-07-22', 3, 'Alice Kamau',    '0723456789',
+     'peter.k', '$2y$12$gE6Dn7YW1htwmNRcag1NLuEyxb9FXOM2.KLNGfhVgPkV86xLHXmjW', TRUE, TRUE),
+    ('GV003', 'Faith Achieng','Female', '2011-01-09', 1, 'Joseph Achieng', '0734567890',
+     'faith.a', '$2y$12$gE6Dn7YW1htwmNRcag1NLuEyxb9FXOM2.KLNGfhVgPkV86xLHXmjW', TRUE, TRUE),
+    ('GV004', 'Brian Kiptoo', 'Male',   '2008-11-30', 4, 'Nancy Kiptoo',   '0745678901',
+     'brian.k', '$2y$12$gE6Dn7YW1htwmNRcag1NLuEyxb9FXOM2.KLNGfhVgPkV86xLHXmjW', TRUE, TRUE);
 
 -- ---- Subjects (teacher_id references teachers) ----------------------------
 INSERT INTO subjects (subject_code, subject_name, teacher_id) VALUES
@@ -73,5 +85,7 @@ INSERT INTO results (student_id, subject_id, exam_id, marks, grade) VALUES
     (2, 4, 2, 58, 'C+');   -- Peter, Science,     Mid-Term
 
 -- ============================================================================
--- Done. You can now log in at login.php with admin/admin123.
+-- Done. You can now log in at login.php:
+--   Staff panel: admin / admin123
+--   Student panel: mary.w / student123 (must change password on first login)
 -- ============================================================================

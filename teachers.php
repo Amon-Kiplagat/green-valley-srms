@@ -28,19 +28,39 @@ if (isset($_GET['edit']) && is_admin()) {
     }
 }
 
+// If changing password, load the user account.
+$changePasswordUser = null;
+if (isset($_GET['change_password']) && is_admin()) {
+    $cpId = (int)$_GET['change_password'];
+    $stmt = $pdo->prepare(
+        'SELECT u.user_id, u.username, u.full_name, u.role, t.full_name AS teacher_name
+           FROM users u
+           LEFT JOIN teachers t ON t.teacher_id = u.teacher_id
+          WHERE u.user_id = :id'
+    );
+    $stmt->execute([':id' => $cpId]);
+    $changePasswordUser = $stmt->fetch();
+    if (!$changePasswordUser) {
+        set_flash('error', 'User account not found.');
+        redirect('teachers.php');
+    }
+}
+
 $search = input('q');
 
-// List teachers with the subjects each one teaches (string_agg).
+// List teachers with the subjects each one teaches (string_agg) and linked user account.
 $sql = "SELECT t.teacher_id, t.staff_no, t.full_name, t.gender, t.phone, t.email,
-               COALESCE(string_agg(s.subject_name, ', ' ORDER BY s.subject_name), '') AS subjects
+               COALESCE(string_agg(s.subject_name, ', ' ORDER BY s.subject_name), '') AS subjects,
+               u.user_id AS user_id, u.username, u.role
           FROM teachers t
-          LEFT JOIN subjects s ON s.teacher_id = t.teacher_id";
+          LEFT JOIN subjects s ON s.teacher_id = t.teacher_id
+          LEFT JOIN users u ON u.teacher_id = t.teacher_id";
 $params = [];
 if ($search !== '') {
     $sql .= " WHERE t.full_name ILIKE :q OR t.staff_no ILIKE :q OR t.email ILIKE :q";
     $params[':q'] = '%' . $search . '%';
 }
-$sql .= " GROUP BY t.teacher_id ORDER BY t.full_name";
+$sql .= " GROUP BY t.teacher_id, u.user_id ORDER BY t.full_name";
 $stmt = $pdo->prepare($sql);
 $stmt->execute($params);
 $teachers = $stmt->fetchAll();
@@ -51,43 +71,68 @@ require_once __DIR__ . '/includes/header.php';
 ?>
 
 <?php if (is_admin()): ?>
-<div class="card">
-    <h2><?= $editing ? 'Edit Teacher' : 'Add Teacher' ?></h2>
-    <form action="vendor/actions/teacher_actions.php" method="post" data-validate>
-        <?= csrf_field() ?>
-        <input type="hidden" name="action" value="<?= $editing ? 'update' : 'create' ?>">
-        <?php if ($editing): ?>
-            <input type="hidden" name="teacher_id" value="<?= e($editing['teacher_id']) ?>">
-        <?php endif; ?>
 
-        <div><label>Teacher ID / Staff No</label>
-            <input type="text" name="staff_no" value="<?= e($editing['staff_no'] ?? '') ?>" required></div>
-        <div><label>Full Name</label>
-            <input type="text" name="full_name" value="<?= e($editing['full_name'] ?? '') ?>" required></div>
-        <div><label>Gender</label>
-            <select name="gender">
-                <?php foreach (['Male', 'Female'] as $g): ?>
-                    <option value="<?= $g ?>" <?= (($editing['gender'] ?? '') === $g) ? 'selected' : '' ?>><?= $g ?></option>
-                <?php endforeach; ?>
-            </select></div>
-        <div><label>Phone</label>
-            <input type="tel" name="phone" value="<?= e($editing['phone'] ?? '') ?>"
-                   inputmode="numeric"
-                   autocomplete="tel"
-                   maxlength="16"
-                   pattern="[0-9+][0-9 ().+-]{7,18}"
-                   placeholder="0712345678"
-                   title="Digits only: 10 digits starting 07 or 01, or the +254 form."
-                   data-phone>
-            <small class="field-hint">Digits only &mdash; e.g. 0712345678 or +254712345678.</small></div>
-        <div><label>Email</label>
-            <input type="email" name="email" value="<?= e($editing['email'] ?? '') ?>"></div>
-        <div style="align-self:end;">
-            <button type="submit"><?= $editing ? 'Update Teacher' : 'Save Teacher' ?></button>
-            <?php if ($editing): ?><a href="teachers.php" class="btn-sm" style="margin-left:8px;">Cancel</a><?php endif; ?>
-        </div>
-    </form>
-</div>
+    <?php if ($changePasswordUser): ?>
+    <div class="card" style="max-width:480px;">
+        <h2><i class="fa-solid fa-key"></i> Change Password</h2>
+        <p style="margin-bottom:16px;">
+            Reset password for <strong><?= e($changePasswordUser['full_name'] ?? $changePasswordUser['teacher_name'] ?? $changePasswordUser['username'] ?? 'Unknown') ?></strong>
+            (<?= e($changePasswordUser['username'] ?? '') ?> — <?= e(ucfirst($changePasswordUser['role'] ?? '')) ?>)
+        </p>
+        <form action="vendor/actions/teacher_actions.php" method="post" data-validate>
+            <?= csrf_field() ?>
+            <input type="hidden" name="action" value="change_password">
+            <input type="hidden" name="user_id" value="<?= e($changePasswordUser['user_id']) ?>">
+            <div><label>New Password</label>
+                <input type="password" name="new_password" required minlength="6" placeholder="At least 6 characters"></div>
+            <div><label>Confirm Password</label>
+                <input type="password" name="confirm_password" required minlength="6" placeholder="Repeat new password"></div>
+            <div style="align-self:end; margin-top:8px;">
+                <button type="submit"><i class="fa-solid fa-check"></i> Update Password</button>
+                <a href="teachers.php" class="btn-sm" style="margin-left:8px;">Cancel</a>
+            </div>
+        </form>
+    </div>
+    <?php else: ?>
+    <div class="card">
+        <h2><?= $editing ? 'Edit Teacher' : 'Add Teacher' ?></h2>
+        <form action="vendor/actions/teacher_actions.php" method="post" data-validate>
+            <?= csrf_field() ?>
+            <input type="hidden" name="action" value="<?= $editing ? 'update' : 'create' ?>">
+            <?php if ($editing): ?>
+                <input type="hidden" name="teacher_id" value="<?= e($editing['teacher_id']) ?>">
+            <?php endif; ?>
+
+            <div><label>Teacher ID / Staff No</label>
+                <input type="text" name="staff_no" value="<?= e($editing['staff_no'] ?? '') ?>" required></div>
+            <div><label>Full Name</label>
+                <input type="text" name="full_name" value="<?= e($editing['full_name'] ?? '') ?>" required></div>
+            <div><label>Gender</label>
+                <select name="gender">
+                    <?php foreach (['Male', 'Female'] as $g): ?>
+                        <option value="<?= $g ?>" <?= (($editing['gender'] ?? '') === $g) ? 'selected' : '' ?>><?= $g ?></option>
+                    <?php endforeach; ?>
+                </select></div>
+            <div><label>Phone</label>
+                <input type="tel" name="phone" value="<?= e($editing['phone'] ?? '') ?>"
+                       inputmode="numeric"
+                       autocomplete="tel"
+                       maxlength="16"
+                       pattern="[0-9+][0-9 ().+-]{7,18}"
+                       placeholder="0712345678"
+                       title="Digits only: 10 digits starting 07 or 01, or the +254 form."
+                       data-phone>
+                <small class="field-hint">Digits only &mdash; e.g. 0712345678 or +254712345678.</small></div>
+            <div><label>Email</label>
+                <input type="email" name="email" value="<?= e($editing['email'] ?? '') ?>"></div>
+            <div style="align-self:end;">
+                <button type="submit"><?= $editing ? 'Update Teacher' : 'Save Teacher' ?></button>
+                <?php if ($editing): ?><a href="teachers.php" class="btn-sm" style="margin-left:8px;">Cancel</a><?php endif; ?>
+            </div>
+        </form>
+    </div>
+    <?php endif; ?>
+
 <?php endif; ?>
 
 <div class="card">
@@ -100,7 +145,7 @@ require_once __DIR__ . '/includes/header.php';
     </form>
 
     <table>
-        <tr><th>ID</th><th>Name</th><th>Phone</th><th>Email</th><th>Subjects</th><th>Action</th></tr>
+        <tr><th>ID</th><th>Name</th><th>Phone</th><th>Email</th><th>Subjects</th><th>Login</th><th>Action</th></tr>
         <?php if ($teachers): ?>
             <?php foreach ($teachers as $t): ?>
                 <tr>
@@ -109,9 +154,19 @@ require_once __DIR__ . '/includes/header.php';
                     <td><?= e(format_phone_display($t['phone'] ?? '')) ?></td>
                     <td><?= e($t['email'] ?? '') ?></td>
                     <td><?= e($t['subjects'] !== '' ? $t['subjects'] : '—') ?></td>
+                    <td>
+                        <?php if (!empty($t['user_id'])): ?>
+                            <span class="badge badge-success"><?= e($t['username'] ?? '—') ?></span>
+                        <?php else: ?>
+                            <span class="badge badge-muted">No account</span>
+                        <?php endif; ?>
+                    </td>
                     <td class="actions">
                         <?php if (is_admin()): ?>
                             <a href="teachers.php?edit=<?= e($t['teacher_id']) ?>">Edit</a>
+                            <?php if (!empty($t['user_id'])): ?>
+                                <a href="teachers.php?change_password=<?= e($t['user_id']) ?>">Password</a>
+                            <?php endif; ?>
                             <a class="btn-danger"
                                href="vendor/actions/teacher_actions.php?action=delete&teacher_id=<?= e($t['teacher_id']) ?>&csrf_token=<?= e(csrf_token()) ?>"
                                data-confirm="Delete <?= e($t['full_name']) ?>?">Delete</a>
@@ -122,7 +177,7 @@ require_once __DIR__ . '/includes/header.php';
                 </tr>
             <?php endforeach; ?>
         <?php else: ?>
-            <tr><td colspan="6">No teachers found.</td></tr>
+            <tr><td colspan="7">No teachers found.</td></tr>
         <?php endif; ?>
     </table>
 </div>
