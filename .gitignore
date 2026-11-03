@@ -1,6 +1,9 @@
 # Environment and secrets
 .env
 
+# Composer dependencies
+vendor/
+
 # IDE configuration
 .idea/
 *.iml

@@ -32,10 +32,16 @@ if (!function_exists('e')) {
     <title><?= e($page_title) ?> — Green Valley SRMS</title>
     <link rel="stylesheet" href="css/style.css">
 
+    <!-- Google Fonts & Font Awesome -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
     <!-- Progressive Web App: installable to a phone + works offline.
          The manifest and icons are static files; the offline behaviour lives
          in service-worker.js (registered from js/pwa.js). No DB access here. -->
-    <meta name="theme-color" content="#1f5138">
+    <meta name="theme-color" content="#4f46e5">
     <meta name="description" content="Student Records Management System for Green Valley Secondary School, Murang'a County.">
     <link rel="manifest" href="manifest.webmanifest">
     <link rel="icon" href="icons/favicon-32.png" sizes="32x32" type="image/png">

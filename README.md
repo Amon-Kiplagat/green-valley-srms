@@ -124,7 +124,7 @@ green_valley_srms_html_pages/   (this folder = your web root)
 Each old `*.html` file has been replaced by the matching `*.php` file. The `.html` files
 that remain are tiny redirects that forward to the working `.php` pages, so old links keep
 working; the working `.php` pages are the single source of truth. The forms
-now submit to the handlers in `actions/`, which validate the input and talk to PostgreSQL.
+now submit to the handlers in `vendor/actions`, which validate the input and talk to PostgreSQL.
 
 > **Important:** always open the app through the running PHP server (e.g.
 > `http://localhost:8000/`), **not** by double-clicking an `.html` or `.php` file in your

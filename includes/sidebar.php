@@ -16,21 +16,21 @@ $navClass = static function (string $file) use ($current): string {
     return $file === $current ? 'active' : '';
 };
 
-/** Inline SVG icon for a nav item (stroked, inherits currentColor). */
+/** Font Awesome icon class for a nav item. */
 $navIcon = static function (string $key): string {
-    $paths = [
-        'dashboard' => '<rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/>',
-        'students'  => '<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>',
-        'teachers'  => '<path d="M22 10 12 5 2 10l10 5 10-5Z"/><path d="M6 12v5c0 1 2.7 3 6 3s6-2 6-3v-5"/>',
-        'classes'   => '<path d="M3 21h18"/><path d="M5 21V8l7-4 7 4v13"/><path d="M10 21v-6h4v6"/>',
-        'subjects'  => '<path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2Z"/>',
-        'exams'     => '<rect x="5" y="4" width="14" height="17" rx="2"/><path d="M9 4V2.8h6V4"/><path d="M9 11h6M9 15h4"/>',
-        'results'   => '<path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4 12.5-12.5Z"/>',
-        'reports'   => '<path d="M3 3v18h18"/><path d="M7 15v3M12 10v8M17 6v12"/>',
-        'logout'    => '<path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="m16 17 5-5-5-5"/><path d="M21 12H9"/>',
+    $icons = [
+        'dashboard' => 'fa-solid fa-table-columns',
+        'students'  => 'fa-solid fa-user-graduate',
+        'teachers'  => 'fa-solid fa-chalkboard-user',
+        'classes'   => 'fa-solid fa-school',
+        'subjects'  => 'fa-solid fa-book',
+        'exams'     => 'fa-solid fa-clipboard-list',
+        'results'   => 'fa-solid fa-pen-to-square',
+        'reports'   => 'fa-solid fa-chart-column',
+        'logout'    => 'fa-solid fa-right-from-bracket',
     ];
-    $inner = $paths[$key] ?? '';
-    return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' . $inner . '</svg>';
+    $icon = $icons[$key] ?? 'fa-solid fa-circle';
+    return '<i class="' . $icon . '" aria-hidden="true"></i>';
 };
 
 /** Nav structure: group label => [ file => [label, icon-key] ]. */
@@ -39,10 +39,11 @@ $navGroups = [
         'dashboard.php' => ['Dashboard', 'dashboard'],
     ],
     'Records' => [
-        'students.php' => ['Students', 'students'],
-        'teachers.php' => ['Teachers', 'teachers'],
-        'classes.php'  => ['Classes',  'classes'],
-        'subjects.php' => ['Subjects', 'subjects'],
+        'students.php'         => ['Students', 'students'],
+        'teachers.php'         => ['Teachers', 'teachers'],
+        'teacher_accounts.php' => ['Teacher Accounts', 'teachers'],
+        'classes.php'          => ['Classes',  'classes'],
+        'subjects.php'         => ['Subjects', 'subjects'],
     ],
     'Assessment' => [
         'exams.php'   => ['Exams',   'exams'],

@@ -59,9 +59,6 @@ $error = '';
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
     <meta name="theme-color" content="#4f46e5">
-    <link rel="manifest" href="manifest.webmanifest">
-    <link rel="icon" href="icons/favicon-32.png" sizes="32x32" type="image/png">
-    <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
 
     <style>
         * {
@@ -391,16 +388,17 @@ $error = '';
             <p>Set a new password for <strong><?= e($resetUser['full_name']) ?></strong></p>
           </div>
 
-          <form action="actions/reset_actions.php" method="post" data-validate>
+          <form action="vendor/actions/reset_actions.php" method="post" data-validate>
               <input type="hidden" name="action" value="reset">
               <input type="hidden" name="token" value="<?= e($token) ?>">
+              <?= csrf_field() ?>
 
               <div class="input-group">
                   <label>New Password</label>
                   <div class="input-box">
                       <i class="fa-solid fa-lock"></i>
                       <input type="password" id="password" name="password"
-                             placeholder="••••••••" required minlength="6">
+                             placeholder="••••••••" required minlength="8">
                       <i class="fa-solid fa-eye toggle-pass" onclick="togglePwd('password', this)"></i>
                   </div>
                   <div class="strength-wrapper">
@@ -414,9 +412,13 @@ $error = '';
                   <div class="input-box">
                       <i class="fa-solid fa-key"></i>
                       <input type="password" id="confirm" name="confirm"
-                             placeholder="••••••••" required minlength="6">
+                             placeholder="••••••••" required minlength="8">
                   </div>
               </div>
+
+              <p style="font-size:0.72rem;color:#64748b;margin-bottom:16px;">
+                Password must be at least 8 characters with an uppercase letter, a number, and a special character.
+              </p>
 
               <button type="submit" class="btn-bento">Update Password</button>
           </form>
@@ -428,8 +430,9 @@ $error = '';
             <p>Enter the email address associated with your account to receive a reset link.</p>
           </div>
 
-          <form action="actions/reset_actions.php" method="post">
+          <form action="vendor/actions/reset_actions.php" method="post">
               <input type="hidden" name="action" value="request">
+              <?= csrf_field() ?>
 
               <div class="input-group">
                   <label>Email Address</label>
@@ -476,7 +479,7 @@ $error = '';
       pwd.addEventListener('input', function () {
         var v = pwd.value;
         var score = 0;
-        if (v.length >= 6) score++;
+        if (v.length >= 8) score++;
         if (v.length >= 10) score++;
         if (/[A-Z]/.test(v)) score++;
         if (/[0-9]/.test(v)) score++;
