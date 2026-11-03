@@ -788,3 +788,4 @@ student why they cannot sign in saves a trip to the office. The limits live at t
   (`images/branding/school-logo.png`), then reload the page. If the PDF still shows the GV
   mark, look in the PHP error log for a `skipping logo` warning — the file is probably not
   a real PNG/JPEG (e.g. a renamed `.webp` or `.svg`).
+# green-valley-srms
