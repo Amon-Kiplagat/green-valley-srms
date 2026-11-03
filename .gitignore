@@ -1,0 +1,21 @@
+# Environment and secrets
+.env
+
+# Composer dependencies
+vendor/
+
+# IDE configuration
+.idea/
+*.iml
+
+# Junie assistant files
+.junie/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+.env
+.env.local
