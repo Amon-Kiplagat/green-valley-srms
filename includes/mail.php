@@ -84,15 +84,9 @@ function send_email(string $to, string $subject, string $body): bool
         error_log('SMTP: missing credentials in environment or .env');
     }
 
-    // Fallback: use PHP built-in mail() function
-    if (function_exists('mail')) {
-        $headers = "From: {$fromName} <{$from}>\r\n";
-        $headers .= "Reply-To: {$from}\r\n";
-        $headers .= "X-Mailer: PHP/" . phpversion();
-        return mail($to, $subject, $body, $headers);
-    }
-
-    error_log('No email method available (PHPMailer not installed, mail() not available).');
+    // No fallback to mail() — it returns true on Docker without actually sending.
+    // The caller (reset_actions.php) will show the reset link on-screen if this returns false.
+    error_log('Email send failed: PHPMailer unavailable or SMTP credentials missing.');
     return false;
 }
 
