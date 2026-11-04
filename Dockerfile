@@ -34,7 +34,8 @@ RUN rm -f .env
 RUN composer install --no-dev --optimize-autoloader
 
 # Set permissions
-RUN chown -R www-data:www-data /var/www/html
+RUN chown -R www-data:www-data /var/www/html && \
+    chmod +x /var/www/html/start-php-fpm.sh
 
 # Configure Nginx to serve PHP files
 RUN rm -f /etc/nginx/sites-enabled/default && \
