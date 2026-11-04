@@ -20,15 +20,26 @@ declare(strict_types=1);
  */
 function send_email(string $to, string $subject, string $body): bool
 {
-    // Load .env values, but check environment variables first (for Render, etc.).
+    // Helper: read an environment variable from all possible sources.
+    // PHP-FPM (Nginx) may not expose env vars via getenv(), so try $_ENV, $_SERVER, getenv, and .env.
     $env = parse_env_file(__DIR__ . '/../.env');
+    $getEnv = function(string $key, $default = '') {
+        $val = $_ENV[$key] ?? $_SERVER[$key] ?? getenv($key) ?? $default;
+        return $val ?: $default;
+    };
 
-    $host = getenv('SMTP_HOST') ?: ($_SERVER['SMTP_HOST'] ?: ($env['SMTP_HOST'] ?? ''));
-    $port = (int)(getenv('SMTP_PORT') ?: ($_SERVER['SMTP_PORT'] ?: ($env['SMTP_PORT'] ?? 587)));
-    $user = getenv('SMTP_USER') ?: ($_SERVER['SMTP_USER'] ?: ($env['SMTP_USER'] ?? ''));
-    $pass = getenv('SMTP_PASS') ?: ($_SERVER['SMTP_PASS'] ?: ($env['SMTP_PASS'] ?? ''));
-    $from = getenv('SMTP_FROM') ?: ($_SERVER['SMTP_FROM'] ?: ($env['SMTP_FROM'] ?? $user));
-    $fromName = getenv('SMTP_FROM_NAME') ?: ($_SERVER['SMTP_FROM_NAME'] ?: ($env['SMTP_FROM_NAME'] ?? 'Green Valley SRMS'));
+    $host = $getEnv('SMTP_HOST', $env['SMTP_HOST'] ?? '');
+    $port = (int)$getEnv('SMTP_PORT', $env['SMTP_PORT'] ?? 587);
+    $user = $getEnv('SMTP_USER', $env['SMTP_USER'] ?? '');
+    $pass = $getEnv('SMTP_PASS', $env['SMTP_PASS'] ?? '');
+    $from = $getEnv('SMTP_FROM', $env['SMTP_FROM'] ?? $user);
+    $fromName = $getEnv('SMTP_FROM_NAME', $env['SMTP_FROM_NAME'] ?? 'Green Valley SRMS');
+
+    // Log which source provided credentials for debugging.
+    if ($host === '' || $user === '' || $pass === '') {
+        error_log('SMTP: missing credentials. host=' . ($host ? 'set' : 'empty') .
+                  ', user=' . ($user ? 'set' : 'empty') . ', pass=' . ($pass ? 'set' : 'empty'));
+    }
 
     // Load PHPMailer via Composer autoloader
     $autoload = __DIR__ . '/../vendor/autoload.php';
@@ -70,7 +81,7 @@ function send_email(string $to, string $subject, string $body): bool
             error_log('PHPMailer class not found. Run "composer install".');
         }
     } elseif ($host === '' || $user === '' || $pass === '') {
-        error_log('SMTP: missing credentials in .env');
+        error_log('SMTP: missing credentials in environment or .env');
     }
 
     // Fallback: use PHP built-in mail() function
