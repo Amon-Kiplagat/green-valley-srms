@@ -20,15 +20,15 @@ declare(strict_types=1);
  */
 function send_email(string $to, string $subject, string $body): bool
 {
-    // Load .env values.
+    // Load .env values, but check environment variables first (for Render, etc.).
     $env = parse_env_file(__DIR__ . '/../.env');
 
-    $host = $env['SMTP_HOST'] ?? '';
-    $port = (int)($env['SMTP_PORT'] ?? 587);
-    $user = $env['SMTP_USER'] ?? '';
-    $pass = $env['SMTP_PASS'] ?? '';
-    $from = $env['SMTP_FROM'] ?? $user;
-    $fromName = $env['SMTP_FROM_NAME'] ?? 'Green Valley SRMS';
+    $host = getenv('SMTP_HOST') ?: ($_SERVER['SMTP_HOST'] ?: ($env['SMTP_HOST'] ?? ''));
+    $port = (int)(getenv('SMTP_PORT') ?: ($_SERVER['SMTP_PORT'] ?: ($env['SMTP_PORT'] ?? 587)));
+    $user = getenv('SMTP_USER') ?: ($_SERVER['SMTP_USER'] ?: ($env['SMTP_USER'] ?? ''));
+    $pass = getenv('SMTP_PASS') ?: ($_SERVER['SMTP_PASS'] ?: ($env['SMTP_PASS'] ?? ''));
+    $from = getenv('SMTP_FROM') ?: ($_SERVER['SMTP_FROM'] ?: ($env['SMTP_FROM'] ?? $user));
+    $fromName = getenv('SMTP_FROM_NAME') ?: ($_SERVER['SMTP_FROM_NAME'] ?: ($env['SMTP_FROM_NAME'] ?? 'Green Valley SRMS'));
 
     // Load PHPMailer via Composer autoloader
     $autoload = __DIR__ . '/../vendor/autoload.php';
