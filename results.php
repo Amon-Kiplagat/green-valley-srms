@@ -57,7 +57,7 @@ require_once __DIR__ . '/includes/header.php';
 
 <div class="card">
     <h2><?= $editing ? 'Edit Marks' : 'Enter Marks' ?></h2>
-    <form action="vendor/actions/result_actions.php" method="post" data-validate>
+    <form action="actions/result_actions.php" method="post" data-validate>
         <?= csrf_field() ?>
         <input type="hidden" name="action" value="<?= $editing ? 'update' : 'create' ?>">
         <?php if ($editing): ?><input type="hidden" name="result_id" value="<?= e($editing['result_id']) ?>"><?php endif; ?>
@@ -139,7 +139,7 @@ require_once __DIR__ . '/includes/header.php';
                         <a href="results.php?edit=<?= e($r['result_id']) ?>">Edit</a>
                         <?php if (is_admin()): ?>
                             <a class="btn-danger"
-                               href="vendor/actions/result_actions.php?action=delete&result_id=<?= e($r['result_id']) ?>&csrf_token=<?= e(csrf_token()) ?>"
+                               href="actions/result_actions.php?action=delete&result_id=<?= e($r['result_id']) ?>&csrf_token=<?= e(csrf_token()) ?>"
                                data-confirm="Delete this mark?">Delete</a>
                         <?php endif; ?>
                     </td>

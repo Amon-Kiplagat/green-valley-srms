@@ -397,7 +397,7 @@ $error = '';
             <p>Set a new password for <strong><?= e($resetUser['full_name']) ?></strong></p>
           </div>
 
-          <form action="vendor/actions/reset_actions.php" method="post" data-validate>
+          <form action="actions/reset_actions.php" method="post" data-validate>
               <input type="hidden" name="action" value="reset">
               <input type="hidden" name="token" value="<?= e($token) ?>">
               <?= csrf_field() ?>
@@ -439,7 +439,7 @@ $error = '';
             <p>Enter the email address associated with your account to receive a reset link.</p>
           </div>
 
-          <form action="vendor/actions/reset_actions.php" method="post">
+          <form action="actions/reset_actions.php" method="post">
               <input type="hidden" name="action" value="request">
               <?= csrf_field() ?>
 

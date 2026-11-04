@@ -1,6 +1,5 @@
-# Composer dependencies (reinstalled in Docker, but keep vendor/actions)
-vendor/phpmailer
-vendor/composer
+# Composer dependencies (reinstalled in Docker)
+vendor/
 composer.lock
 
 # Environment and secrets

@@ -79,7 +79,7 @@ require_once __DIR__ . '/includes/header.php';
             Reset password for <strong><?= e($changePasswordUser['full_name'] ?? $changePasswordUser['teacher_name'] ?? $changePasswordUser['username'] ?? 'Unknown') ?></strong>
             (<?= e($changePasswordUser['username'] ?? '') ?> — <?= e(ucfirst($changePasswordUser['role'] ?? '')) ?>)
         </p>
-        <form action="vendor/actions/teacher_actions.php" method="post" data-validate>
+        <form action="actions/teacher_actions.php" method="post" data-validate>
             <?= csrf_field() ?>
             <input type="hidden" name="action" value="change_password">
             <input type="hidden" name="user_id" value="<?= e($changePasswordUser['user_id']) ?>">
@@ -96,7 +96,7 @@ require_once __DIR__ . '/includes/header.php';
     <?php else: ?>
     <div class="card">
         <h2><?= $editing ? 'Edit Teacher' : 'Add Teacher' ?></h2>
-        <form action="vendor/actions/teacher_actions.php" method="post" data-validate>
+        <form action="actions/teacher_actions.php" method="post" data-validate>
             <?= csrf_field() ?>
             <input type="hidden" name="action" value="<?= $editing ? 'update' : 'create' ?>">
             <?php if ($editing): ?>
@@ -168,7 +168,7 @@ require_once __DIR__ . '/includes/header.php';
                                 <a href="teachers.php?change_password=<?= e($t['user_id']) ?>">Password</a>
                             <?php endif; ?>
                             <a class="btn-danger"
-                               href="vendor/actions/teacher_actions.php?action=delete&teacher_id=<?= e($t['teacher_id']) ?>&csrf_token=<?= e(csrf_token()) ?>"
+                               href="actions/teacher_actions.php?action=delete&teacher_id=<?= e($t['teacher_id']) ?>&csrf_token=<?= e(csrf_token()) ?>"
                                data-confirm="Delete <?= e($t['full_name']) ?>?">Delete</a>
                         <?php else: ?>
                             <span>—</span>

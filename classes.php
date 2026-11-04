@@ -43,7 +43,7 @@ require_once __DIR__ . '/includes/header.php';
 <?php if (is_admin()): ?>
 <div class="card">
     <h2><?= $editing ? 'Edit Class' : 'Add Class' ?></h2>
-    <form action="vendor/actions/class_actions.php" method="post" data-validate>
+    <form action="actions/class_actions.php" method="post" data-validate>
         <?= csrf_field() ?>
         <input type="hidden" name="action" value="<?= $editing ? 'update' : 'create' ?>">
         <?php if ($editing): ?><input type="hidden" name="class_id" value="<?= e($editing['class_id']) ?>"><?php endif; ?>
@@ -86,7 +86,7 @@ require_once __DIR__ . '/includes/header.php';
                         <?php if (is_admin()): ?>
                             <a href="classes.php?edit=<?= e($c['class_id']) ?>">Edit</a>
                             <a class="btn-danger"
-                               href="vendor/actions/class_actions.php?action=delete&class_id=<?= e($c['class_id']) ?>&csrf_token=<?= e(csrf_token()) ?>"
+                               href="actions/class_actions.php?action=delete&class_id=<?= e($c['class_id']) ?>&csrf_token=<?= e(csrf_token()) ?>"
                                data-confirm="Delete class <?= e($c['class_name']) ?>?">Delete</a>
                         <?php else: ?><span>—</span><?php endif; ?>
                     </td>

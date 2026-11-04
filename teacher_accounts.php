@@ -81,13 +81,13 @@ require_once __DIR__ . '/includes/header.php';
                             </button>
                             <?php if ($t['account_active']): ?>
                                 <a class="btn-sm btn-danger"
-                                   href="vendor/actions/teacher_account_actions.php?action=deactivate&teacher_id=<?= (int)$t['teacher_id'] ?>&csrf_token=<?= e(csrf_token()) ?>"
+                                   href="actions/teacher_account_actions.php?action=deactivate&teacher_id=<?= (int)$t['teacher_id'] ?>&csrf_token=<?= e(csrf_token()) ?>"
                                    data-confirm="Deactivate <?= e($t['full_name']) ?>? They will not be able to log in.">
                                     <i class="fa-solid fa-ban"></i> Deactivate
                                 </a>
                             <?php else: ?>
                                 <a class="btn-sm"
-                                   href="vendor/actions/teacher_account_actions.php?action=activate&teacher_id=<?= (int)$t['teacher_id'] ?>&csrf_token=<?= e(csrf_token()) ?>">
+                                   href="actions/teacher_account_actions.php?action=activate&teacher_id=<?= (int)$t['teacher_id'] ?>&csrf_token=<?= e(csrf_token()) ?>">
                                     <i class="fa-solid fa-check"></i> Activate
                                 </a>
                             <?php endif; ?>
@@ -108,7 +108,7 @@ require_once __DIR__ . '/includes/header.php';
         <p style="color:#64748b;margin-bottom:20px;font-size:0.9rem;">
             Creating account for: <strong id="createTeacherName"></strong>
         </p>
-        <form action="vendor/actions/teacher_account_actions.php" method="post" data-validate>
+        <form action="actions/teacher_account_actions.php" method="post" data-validate>
             <?= csrf_field() ?>
             <input type="hidden" name="action" value="create_account">
             <input type="hidden" name="teacher_id" id="createTeacherId">
@@ -151,7 +151,7 @@ require_once __DIR__ . '/includes/header.php';
             Resetting password for: <strong id="resetTeacherName"></strong>
             (<span id="resetUsername"></span>)
         </p>
-        <form action="vendor/actions/teacher_account_actions.php" method="post" data-validate>
+        <form action="actions/teacher_account_actions.php" method="post" data-validate>
             <?= csrf_field() ?>
             <input type="hidden" name="action" value="reset_password">
             <input type="hidden" name="teacher_id" id="resetTeacherId">

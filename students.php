@@ -56,7 +56,7 @@ require_once __DIR__ . '/includes/header.php';
 
 <div class="card">
     <h2><?= $editing ? 'Edit Student' : 'Add Student' ?></h2>
-    <form action="vendor/actions/student_actions.php" method="post" data-validate>
+    <form action="actions/student_actions.php" method="post" data-validate>
         <?= csrf_field() ?>
         <input type="hidden" name="action" value="<?= $editing ? 'update' : 'create' ?>">
         <?php if ($editing): ?>
@@ -163,7 +163,7 @@ require_once __DIR__ . '/includes/header.php';
                                 <a href="#" class="btn-sm" data-open-portal-modal="<?= e($s['student_id']) ?>" data-username="">Enable</a>
                             <?php endif; ?>
                             <a class="btn-danger"
-                               href="vendor/actions/student_actions.php?action=delete&student_id=<?= e($s['student_id']) ?>&csrf_token=<?= e(csrf_token()) ?>"
+                               href="actions/student_actions.php?action=delete&student_id=<?= e($s['student_id']) ?>&csrf_token=<?= e(csrf_token()) ?>"
                                data-confirm="Delete <?= e($s['full_name']) ?>? This cannot be undone.">Delete</a>
                         <?php endif; ?>
                     </td>
@@ -182,7 +182,7 @@ require_once __DIR__ . '/includes/header.php';
         <p id="portal-modal-student" style="margin-bottom:20px; color:#64748b;"></p>
 
         <!-- Enable Portal Form -->
-        <form id="portal-enable-form" action="vendor/actions/student_actions.php" method="post" style="display:none;">
+        <form id="portal-enable-form" action="actions/student_actions.php" method="post" style="display:none;">
             <?= csrf_field() ?>
             <input type="hidden" name="action" value="enable_portal">
             <input type="hidden" name="student_id" id="portal-enable-student-id">
@@ -205,7 +205,7 @@ require_once __DIR__ . '/includes/header.php';
         </form>
 
         <!-- Manage Portal Form (reset password + disable) -->
-        <form id="portal-manage-form" action="vendor/actions/student_actions.php" method="post" style="display:none;">
+        <form id="portal-manage-form" action="actions/student_actions.php" method="post" style="display:none;">
             <?= csrf_field() ?>
             <input type="hidden" name="action" value="reset_portal_password">
             <input type="hidden" name="student_id" id="portal-manage-student-id">
@@ -224,7 +224,7 @@ require_once __DIR__ . '/includes/header.php';
         </form>
 
         <!-- Disable Portal -->
-        <form id="portal-disable-form" action="vendor/actions/student_actions.php" method="post" style="display:none;">
+        <form id="portal-disable-form" action="actions/student_actions.php" method="post" style="display:none;">
             <?= csrf_field() ?>
             <input type="hidden" name="action" value="disable_portal">
             <input type="hidden" name="student_id" id="portal-disable-student-id">

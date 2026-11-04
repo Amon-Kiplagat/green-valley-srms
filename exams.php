@@ -39,7 +39,7 @@ require_once __DIR__ . '/includes/header.php';
 <?php if (is_admin()): ?>
 <div class="card">
     <h2><?= $editing ? 'Edit Examination' : 'Add Examination' ?></h2>
-    <form action="vendor/actions/exam_actions.php" method="post" data-validate>
+    <form action="actions/exam_actions.php" method="post" data-validate>
         <?= csrf_field() ?>
         <input type="hidden" name="action" value="<?= $editing ? 'update' : 'create' ?>">
         <?php if ($editing): ?><input type="hidden" name="exam_id" value="<?= e($editing['exam_id']) ?>"><?php endif; ?>
@@ -79,7 +79,7 @@ require_once __DIR__ . '/includes/header.php';
                         <?php if (is_admin()): ?>
                             <a href="exams.php?edit=<?= e($ex['exam_id']) ?>">Edit</a>
                             <a class="btn-danger"
-                               href="vendor/actions/exam_actions.php?action=delete&exam_id=<?= e($ex['exam_id']) ?>&csrf_token=<?= e(csrf_token()) ?>"
+                               href="actions/exam_actions.php?action=delete&exam_id=<?= e($ex['exam_id']) ?>&csrf_token=<?= e(csrf_token()) ?>"
                                data-confirm="Delete this exam and all its marks?">Delete</a>
                         <?php else: ?><span>—</span><?php endif; ?>
                     </td>
