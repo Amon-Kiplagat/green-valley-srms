@@ -1,6 +1,6 @@
 # Render-compatible Dockerfile for Green Valley SRMS
 # Uses a single PHP container with built-in web server
-# Render sets the $PORT environment variable automatically
+# Render sets the $PORT environment variable at runtime
 
 FROM php:8.3-cli
 
@@ -34,12 +34,9 @@ RUN composer install --no-dev --optimize-autoloader
 # Set permissions
 RUN chown -R www-data:www-data /var/www/html
 
-# Expose the port Render will assign
-EXPOSE $PORT
-
-# Health check
-HEALTHCHECK --interval=30s --timeout=10s --start-period=15s --retries=3 \
-    CMD curl -f http://localhost:${PORT}/login.php || exit 1
+# Default port (Render overrides $PORT at runtime)
+ENV PORT=8080
+EXPOSE 8080
 
 # Start PHP built-in web server on the port Render provides
-CMD ["php", "-S", "0.0.0.0:${PORT}"]
+CMD ["sh", "-c", "php -S 0.0.0.0:${PORT}"]
