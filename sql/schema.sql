@@ -52,6 +52,7 @@ CREATE TABLE users (
     username      VARCHAR(60)  NOT NULL UNIQUE,
     password_hash VARCHAR(255) NOT NULL,          -- output of PHP password_hash()
     full_name     VARCHAR(120) NOT NULL,
+    email         VARCHAR(120) UNIQUE,
     role          VARCHAR(20)  NOT NULL DEFAULT 'teacher'
                   CHECK (role IN ('admin', 'teacher')),
     teacher_id    INTEGER REFERENCES teachers(teacher_id) ON DELETE SET NULL,

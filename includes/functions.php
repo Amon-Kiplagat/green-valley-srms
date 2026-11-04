@@ -391,6 +391,10 @@ function input(string $key, string $default = ''): string
  */
 function redirect(string $to): void
 {
+    // Ensure absolute path so redirects work from subdirectories (e.g. actions/)
+    if ($to !== '' && $to[0] !== '/' && !str_starts_with($to, 'http')) {
+        $to = '/' . $to;
+    }
     header('Location: ' . $to);
     exit;
 }
