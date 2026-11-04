@@ -68,9 +68,13 @@ if ($action === 'request' && $_SERVER['REQUEST_METHOD'] === 'POST') {
         ':hash' => $tokenHash,
     ]);
 
-    // Build the reset link using APP_BASE_URL from .env.
-    $env = parse_env_file(__DIR__ . '/../.env');
-    $baseUrl = rtrim($env['APP_BASE_URL'] ?? 'http://localhost', '/');
+    // Build the reset link using APP_BASE_URL (env var first, then .env file).
+    $baseUrl = getenv('APP_BASE_URL');
+    if ($baseUrl === false || $baseUrl === '') {
+        $env = parse_env_file(__DIR__ . '/../.env');
+        $baseUrl = $env['APP_BASE_URL'] ?? 'http://localhost';
+    }
+    $baseUrl = rtrim($baseUrl, '/');
     $resetLink = $baseUrl . '/reset-password.php?token=' . $rawToken;
 
     // Compose the email.
