@@ -36,6 +36,9 @@ RUN composer install --no-dev --optimize-autoloader
 # Set permissions
 RUN chown -R www-data:www-data /var/www/html
 
+# Configure PHP-FPM to pass environment variables
+RUN sed -i 's/clear_env = yes/clear_env = no/' /usr/local/etc/php-fpm.d/www.conf
+
 # Configure Nginx to serve PHP files
 RUN rm -f /etc/nginx/sites-enabled/default && \
     echo 'server { \
