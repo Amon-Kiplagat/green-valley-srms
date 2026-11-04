@@ -1,13 +1,13 @@
 # Render-compatible Dockerfile for Green Valley SRMS
-# Uses a single PHP container with built-in web server
+# Uses Nginx + PHP-FPM for proper file serving (php -S has routing issues with subdirectories)
 # Render sets the $PORT environment variable at runtime
 
-FROM php:8.3-cli
+FROM php:8.3-fpm
 
 # Set working directory
 WORKDIR /var/www/html
 
-# Install system dependencies and PostgreSQL PHP extension
+# Install system dependencies: Nginx, PostgreSQL PHP extension, and other libs
 RUN apt-get update && apt-get install -y \
     libpq-dev \
     libzip-dev \
@@ -16,6 +16,8 @@ RUN apt-get update && apt-get install -y \
     curl \
     zip \
     unzip \
+    nginx \
+    supervisor \
     && docker-php-ext-install pdo_pgsql mbstring xml zip \
     && rm -rf /var/lib/apt/lists/*
 
@@ -34,9 +36,49 @@ RUN composer install --no-dev --optimize-autoloader
 # Set permissions
 RUN chown -R www-data:www-data /var/www/html
 
+# Configure Nginx to serve PHP files
+RUN rm -f /etc/nginx/sites-enabled/default && \
+    echo 'server { \
+        listen 8080; \
+        server_name _; \
+        root /var/www/html; \
+        index index.php index.html; \
+        \
+        location / { \
+            try_files $uri $uri/ /index.php?$query_string; \
+        } \
+        \
+        location ~ \.php$ { \
+            fastcgi_pass 127.0.0.1:9000; \
+            fastcgi_index index.php; \
+            fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name; \
+            include fastcgi_params; \
+        } \
+        \
+        location ~ /\. { \
+            deny all; \
+        } \
+    }' > /etc/nginx/sites-enabled/default
+
+# Configure supervisord to run both Nginx and PHP-FPM
+RUN echo '[supervisord] \
+nodaemon=true \
+\
+[program:php-fpm] \
+command=php-fpm -F \
+autostart=true \
+autorestart=true \
+stdout_logfile=/var/log/php-fpm.log \
+\
+[program:nginx] \
+command=nginx -g "daemon off;" \
+autostart=true \
+autorestart=true \
+stdout_logfile=/var/log/nginx.log' > /etc/supervisor/conf.d/supervisord.conf
+
 # Default port (Render overrides $PORT at runtime)
 ENV PORT=8080
 EXPOSE 8080
 
-# Start PHP built-in web server on the port Render provides
-CMD ["sh", "-c", "php -S 0.0.0.0:${PORT}"]
+# Start supervisord to manage both Nginx and PHP-FPM
+CMD ["/usr/bin/supervisord", "-c", "/etc/supervisor/conf.d/supervisord.conf"]
