@@ -61,20 +61,7 @@ RUN rm -f /etc/nginx/sites-enabled/default && \
     }' > /etc/nginx/sites-enabled/default
 
 # Configure supervisord to run both Nginx and PHP-FPM
-RUN echo '[supervisord] \
-nodaemon=true \
-\
-[program:php-fpm] \
-command=php-fpm -F \
-autostart=true \
-autorestart=true \
-stdout_logfile=/var/log/php-fpm.log \
-\
-[program:nginx] \
-command=nginx -g "daemon off;" \
-autostart=true \
-autorestart=true \
-stdout_logfile=/var/log/nginx.log' > /etc/supervisor/conf.d/supervisord.conf
+COPY supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 
 # Default port (Render overrides $PORT at runtime)
 ENV PORT=8080
