@@ -13,8 +13,8 @@
 
 declare(strict_types=1);
 
-require_once __DIR__ . '/../../includes/auth.php';
-require_once __DIR__ . '/../../includes/mail.php';
+require_once __DIR__ . '/../includes/auth.php';
+require_once __DIR__ . '/../includes/mail.php';
 
 $pdo = db();
 $action = (string)($_POST['action'] ?? '');
@@ -69,7 +69,7 @@ if ($action === 'request' && $_SERVER['REQUEST_METHOD'] === 'POST') {
     ]);
 
     // Build the reset link using APP_BASE_URL from .env.
-    $env = parse_env_file(__DIR__ . '/../../.env');
+    $env = parse_env_file(__DIR__ . '/../.env');
     $baseUrl = rtrim($env['APP_BASE_URL'] ?? 'http://localhost', '/');
     $resetLink = $baseUrl . '/reset-password.php?token=' . $rawToken;
 
