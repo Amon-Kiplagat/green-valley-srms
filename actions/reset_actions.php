@@ -69,8 +69,8 @@ if ($action === 'request' && $_SERVER['REQUEST_METHOD'] === 'POST') {
     ]);
 
     // Build the reset link using APP_BASE_URL (env var first, then .env file).
-    $baseUrl = getenv('APP_BASE_URL');
-    if ($baseUrl === false || $baseUrl === '') {
+    $baseUrl = $_SERVER['APP_BASE_URL'] ?? getenv('APP_BASE_URL') ?: '';
+    if ($baseUrl === '') {
         $env = parse_env_file(__DIR__ . '/../.env');
         $baseUrl = $env['APP_BASE_URL'] ?? 'http://localhost';
     }
