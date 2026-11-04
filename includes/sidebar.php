@@ -35,7 +35,27 @@ $navIcon = static function (string $key): string {
 };
 
 /** Nav structure: group label => [ file => [label, icon-key] ]. */
-$navGroups = [
+$loggedIn = function_exists('is_logged_in') && is_logged_in();
+$isStudent = function_exists('is_student') && is_student();
+$hasSession = $loggedIn || $isStudent;
+$userName = $loggedIn
+    ? ($_SESSION['full_name'] ?? $_SESSION['username'] ?? 'User')
+    : ($isStudent ? ($_SESSION['student_name'] ?? 'Student') : 'User');
+$userRole = $loggedIn
+    ? (function_exists('current_role') ? (string)(current_role() ?? '') : '')
+    : ($isStudent ? 'Student' : '');
+
+/** Student portal nav: only Dashboard, Exams, Results, Reports, Profile. */
+$studentNav = [
+    'student_home.php'      => ['Dashboard', 'dashboard'],
+    'student_exams.php'     => ['Exams',     'exams'],
+    'student_results.php'   => ['Results',   'results'],
+    'student_reports.php'   => ['Reports',   'reports'],
+    'student_password.php'  => ['Profile',   'profile'],
+];
+
+/** Admin/teacher nav: full navigation. */
+$staffNav = [
     'Overview' => [
         'dashboard.php' => ['Dashboard', 'dashboard'],
         'profile.php'   => ['Profile', 'profile'],
@@ -53,16 +73,6 @@ $navGroups = [
         'reports.php' => ['Reports', 'reports'],
     ],
 ];
-
-$loggedIn = function_exists('is_logged_in') && is_logged_in();
-$isStudent = function_exists('is_student') && is_student();
-$hasSession = $loggedIn || $isStudent;
-$userName = $loggedIn
-    ? ($_SESSION['full_name'] ?? $_SESSION['username'] ?? 'User')
-    : ($isStudent ? ($_SESSION['student_name'] ?? 'Student') : 'User');
-$userRole = $loggedIn
-    ? (function_exists('current_role') ? (string)(current_role() ?? '') : '')
-    : ($isStudent ? 'Student' : '');
 ?>
 <aside class="sidebar" id="sidebar">
     <div class="brand">
@@ -71,16 +81,24 @@ $userRole = $loggedIn
     </div>
 
     <nav class="nav" aria-label="Main navigation">
-        <?php foreach ($navGroups as $label => $links): ?>
-            <div class="nav-group">
-                <div class="nav-label"><?= e($label) ?></div>
-                <?php foreach ($links as $file => [$text, $icon]): ?>
-                    <a class="<?= $navClass($file) ?>" href="<?= e($file) ?>"<?= $navClass($file) ? ' aria-current="page"' : '' ?>>
-                        <?= $navIcon($icon) ?><span><?= e($text) ?></span>
-                    </a>
-                <?php endforeach; ?>
-            </div>
-        <?php endforeach; ?>
+        <?php if ($isStudent): ?>
+            <?php foreach ($studentNav as $file => [$text, $icon]): ?>
+                <a class="<?= $navClass($file) ?>" href="<?= e($file) ?>"<?= $navClass($file) ? ' aria-current="page"' : '' ?>>
+                    <?= $navIcon($icon) ?><span><?= e($text) ?></span>
+                </a>
+            <?php endforeach; ?>
+        <?php else: ?>
+            <?php foreach ($staffNav as $label => $links): ?>
+                <div class="nav-group">
+                    <div class="nav-label"><?= e($label) ?></div>
+                    <?php foreach ($links as $file => [$text, $icon]): ?>
+                        <a class="<?= $navClass($file) ?>" href="<?= e($file) ?>"<?= $navClass($file) ? ' aria-current="page"' : '' ?>>
+                            <?= $navIcon($icon) ?><span><?= e($text) ?></span>
+                        </a>
+                    <?php endforeach; ?>
+                </div>
+            <?php endforeach; ?>
+        <?php endif; ?>
     </nav>
 
     <?php if ($hasSession): ?>
