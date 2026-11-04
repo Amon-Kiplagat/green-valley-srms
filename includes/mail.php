@@ -57,7 +57,9 @@ function send_email(string $to, string $subject, string $body): bool
                 $mail->Password = $pass;
                 $mail->SMTPSecure = \PHPMailer\PHPMailer\PHPMailer::ENCRYPTION_STARTTLS;
                 $mail->Port = $port;
-                $mail->Timeout = 10;
+                $mail->Timeout = 15;
+                $mail->SMTPAutoTLS = false;
+                $mail->SMTPDebug = \PHPMailer\PHPMailer\PHPMailer::DEBUG_OFF;
 
                 // Sender and recipient
                 $mail->setFrom($from, $fromName);
@@ -68,13 +70,20 @@ function send_email(string $to, string $subject, string $body): bool
                 $mail->Subject = $subject;
                 $mail->Body = $body;
 
-                return $mail->send();
+                if ($mail->send()) {
+                    error_log('Email sent successfully to ' . $to);
+                    return true;
+                } else {
+                    error_log('PHPMailer send failed: ' . ($mail->ErrorInfo ?: 'unknown error'));
+                    return false;
+                }
 
             } catch (\PHPMailer\PHPMailer\Exception $e) {
-                // Log the mailer error without exposing credentials
                 error_log('PHPMailer error: ' . $e->getMessage());
+                return false;
             } catch (\Exception $e) {
                 error_log('Email send failed: ' . $e->getMessage());
+                return false;
             }
             // Fall through to mail() fallback
         } else {
