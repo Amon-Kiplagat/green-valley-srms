@@ -114,17 +114,17 @@ require_once __DIR__ . '/includes/header.php';
 
 <div class="card no-print">
     <h2>Generate Report</h2>
-    <form action="reports.php" method="get" class="inline"
+    <form action="reports.php" method="get" class="inline" id="reportForm"
           style="display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:15px;">
-        <div><label>Student</label>
-            <select name="student_id" required>
+        <div>
+            <label>Search Student</label>
+            <input type="text" id="studentSearch" placeholder="Type admission no or name..." autocomplete="off"
+                   style="width:100%;padding:8px 12px;border:1px solid #d1d5db;border-radius:6px;font-size:14px;margin-bottom:8px;">
+            <select name="student_id" id="studentSelect" required
+                    style="width:100%;padding:8px 12px;border:1px solid #d1d5db;border-radius:6px;font-size:14px;">
                 <option value="">-- Select Student --</option>
-                <?php foreach ($students as $s): ?>
-                    <option value="<?= e($s['student_id']) ?>" <?= ($studentId == $s['student_id']) ? 'selected' : '' ?>>
-                        <?= e($s['admission_no'] . ' - ' . $s['full_name']) ?>
-                    </option>
-                <?php endforeach; ?>
-            </select></div>
+            </select>
+        </div>
         <div><label>Examination</label>
             <select name="exam_id">
                 <option value="0">-- All examinations --</option>
@@ -137,6 +137,63 @@ require_once __DIR__ . '/includes/header.php';
         <div style="align-self:end;"><button type="submit">Generate Report</button></div>
     </form>
 </div>
+
+<script>
+(function() {
+    var allStudents = <?= json_encode($students, JSON_HEX_TAG | JSON_HEX_APOS) ?>;
+    var searchInput = document.getElementById('studentSearch');
+    var selectEl    = document.getElementById('studentSelect');
+    var selectedId  = <?= (int)$studentId ?>;
+
+    function populateList(list) {
+        selectEl.innerHTML = '<option value="">-- Select Student --</option>';
+        for (var i = 0; i < list.length; i++) {
+            var opt = document.createElement('option');
+            opt.value = list[i].student_id;
+            opt.textContent = list[i].admission_no + ' - ' + list[i].full_name;
+            if (parseInt(list[i].student_id) === selectedId) {
+                opt.selected = true;
+            }
+            selectEl.appendChild(opt);
+        }
+    }
+
+    // Initial load
+    populateList(allStudents);
+
+    // Restore selected value after populate
+    if (selectedId > 0) {
+        selectEl.value = selectedId;
+    }
+
+    // Filter on type
+    searchInput.addEventListener('input', function() {
+        var q = this.value.toLowerCase().trim();
+        if (q === '') {
+            populateList(allStudents);
+            return;
+        }
+        var filtered = [];
+        for (var i = 0; i < allStudents.length; i++) {
+            var s = allStudents[i];
+            if (s.admission_no.toLowerCase().indexOf(q) !== -1 || s.full_name.toLowerCase().indexOf(q) !== -1) {
+                filtered.push(s);
+            }
+        }
+        populateList(filtered);
+    });
+
+    // Auto-clear search when a student is selected
+    selectEl.addEventListener('change', function() {
+        if (this.value) {
+            var chosen = allStudents.find(function(s) { return parseInt(s.student_id) === parseInt(this.value); }.bind(this));
+            if (chosen) {
+                searchInput.value = chosen.admission_no + ' - ' + chosen.full_name;
+            }
+        }
+    });
+})();
+</script>
 
 <?php if ($studentId > 0 && $student): ?>
 <div class="card">
