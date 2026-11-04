@@ -1,0 +1,45 @@
+# Dependencies
+vendor/
+composer.lock
+
+# Environment and secrets
+.env
+.env.local
+.env.production
+
+# Git
+.git/
+.gitignore
+
+# Documentation
+DEPLOYMENT.md
+README.md
+
+# Docker files (not needed inside the container)
+Dockerfile
+docker-compose.yml
+.dockerignore
+
+# IDE and editor files
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Local development files
+root/
+tools/
+manifest.webmanifest
+service-worker.js
+offline.html
+
+# SQL files (database is managed separately on Render)
+sql/
+
+# Build artifacts
+*.log

@@ -1,0 +1,28 @@
+services:
+  # Web Service - Green Valley SRMS
+  - type: web
+    name: green-valley-srms
+    env: docker
+    region: singapore
+    plan: free
+    healthCheckPath: /login.php
+    envVars:
+      - key: DATABASE_URL
+        fromService:
+          type: pserv
+          name: green-valley-db
+          property: connectionString
+      - key: APP_ENV
+        value: production
+      - key: APP_BASE_URL
+        value: https://green-valley-srms.onrender.com
+      - key: SMTP_HOST
+        value: smtp.gmail.com
+      - key: SMTP_PORT
+        value: "587"
+      - key: SMTP_USER
+        value: kiplagatamon22@gmail.com
+      - key: SMTP_PASS
+        value: mhhk gptu exiw lcak
+      - key: SMTP_FROM
+        value: kiplagatamon22@gmail.com
