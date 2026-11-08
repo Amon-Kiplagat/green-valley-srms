@@ -159,9 +159,6 @@ require_once __DIR__ . '/includes/header.php';
         <button class="btn btn-secondary" onclick="downloadPdf()">
             <i class="fa-solid fa-file-pdf"></i> Download PDF
         </button>
-        <a class="btn btn-secondary" href="student_results.php?download=csv">
-            <i class="fa-solid fa-file-csv"></i> Download CSV
-        </a>
         <a class="btn btn-secondary" href="student_home.php">
             <i class="fa-solid fa-arrow-left"></i> Back to Home
         </a>

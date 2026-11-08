@@ -408,6 +408,16 @@ button, .btn {
 button:hover, .btn:hover { background: var(--primary-deep); transform: translateY(-1px); box-shadow: 0 6px 16px rgba(79,70,229,.4); }
 button:active, .btn:active { transform: translateY(0); }
 
+/* Secondary button — outline style with white text on hover */
+.btn-secondary {
+   background: var(--primary);
+   color: #fff;
+}
+.btn-secondary:hover {
+   background: var(--primary-deep);
+   color: #fff;
+}
+
 /* Small / secondary link-buttons (Cancel, Clear, and row actions) */
 .btn-sm {
    display: inline-flex;
