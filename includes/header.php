@@ -30,7 +30,7 @@ if (!function_exists('e')) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title><?= e($page_title) ?> — Green Valley SRMS</title>
-    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/style.css?v=<?= time() ?>">
 
     <!-- Google Fonts & Font Awesome -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
