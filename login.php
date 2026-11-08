@@ -579,7 +579,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['student_login'])) {
           <label for="student-username">Username</label>
           <div class="input-wrapper">
             <input type="text" id="student-username" name="username"
-                   placeholder="Enter your username" required>
+                   placeholder="Enter your username" autocomplete="off" required>
             <i class="fa-solid fa-user-graduate input-icon"></i>
           </div>
         </div>
@@ -588,7 +588,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['student_login'])) {
           <label for="student-pass">Password</label>
           <div class="input-wrapper">
             <input type="password" id="student-pass" name="password"
-                   placeholder="••••••••" required>
+                   placeholder="••••••••" autocomplete="new-password" required>
             <i class="fa-solid fa-lock input-icon"></i>
             <i class="fa-solid fa-eye toggle-pwd" onclick="togglePassword('student-pass', this)"></i>
           </div>
@@ -632,7 +632,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['student_login'])) {
           <label for="staff-username">Username</label>
           <div class="input-wrapper">
             <input type="text" id="staff-username" name="username"
-                   placeholder="Enter username" required>
+                   placeholder="Enter username" autocomplete="off" required>
             <i class="fa-solid fa-user-shield input-icon"></i>
           </div>
         </div>
@@ -641,7 +641,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['student_login'])) {
           <label for="staff-pass">Password</label>
           <div class="input-wrapper">
             <input type="password" id="staff-pass" name="password"
-                   placeholder="••••••••" required>
+                   placeholder="••••••••" autocomplete="new-password" required>
             <i class="fa-solid fa-key input-icon"></i>
             <i class="fa-solid fa-eye toggle-pwd" onclick="togglePassword('staff-pass', this)"></i>
           </div>
