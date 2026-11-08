@@ -125,18 +125,12 @@ require_once __DIR__ . '/includes/header.php';
     <h2>Generate Report</h2>
     <form action="reports.php" method="get" class="inline" id="reportForm"
           style="display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:15px;">
-        <!-- Filter: Admission Number -->
-        <div>
-            <label>Admission Number</label>
-            <input type="text" name="filter_admission" placeholder="e.g., GV/2024/001" value="<?= e($filterAdmission) ?>"
-                   style="width:100%;padding:8px 12px;border:1px solid #d1d5db;border-radius:6px;font-size:14px;">
-        </div>
         <!-- Filter: Class -->
         <div>
             <label>Class</label>
-            <select name="filter_class"
+            <select name="filter_class" required
                     style="width:100%;padding:8px 12px;border:1px solid #d1d5db;border-radius:6px;font-size:14px;">
-                <option value="0">-- All classes --</option>
+                <option value="">-- Select Class --</option>
                 <?php foreach ($classes as $cl): ?>
                     <option value="<?= e($cl['class_id']) ?>" <?= ($filterClass == $cl['class_id']) ? 'selected' : '' ?>>
                         <?= e($cl['class_name']) ?>
@@ -177,7 +171,7 @@ require_once __DIR__ . '/includes/header.php';
             </select></div>
         <div style="align-self:end;">
             <button type="submit">Generate Report</button>
-            <?php if ($filterAdmission || $filterClass > 0 || $filterSubject > 0): ?>
+            <?php if ($filterClass > 0 || $filterSubject > 0): ?>
                 <a href="reports.php" class="btn-sm" style="margin-left:8px;color:var(--primary);text-decoration:none;">Clear Filters</a>
             <?php endif; ?>
         </div>
@@ -190,10 +184,8 @@ require_once __DIR__ . '/includes/header.php';
     var searchInput = document.getElementById('studentSearch');
     var selectEl    = document.getElementById('studentSelect');
     var classSelect = document.querySelector('select[name="filter_class"]');
-    var admissionInput = document.querySelector('input[name="filter_admission"]');
     var selectedId  = <?= (int)$studentId ?>;
     var filterClassId = <?= $filterClass ?>;
-    var filterAdmission = '<?= addslashes($filterAdmission) ?>'.toLowerCase();
 
     function populateList(list) {
         selectEl.innerHTML = '<option value="">-- Select Student --</option>';
@@ -213,12 +205,6 @@ require_once __DIR__ . '/includes/header.php';
         // Filter by class
         if (filterClassId > 0) {
             students = students.filter(function(s) { return parseInt(s.class_id) === filterClassId; });
-        }
-        // Filter by admission number from the filter input
-        if (filterAdmission) {
-            students = students.filter(function(s) {
-                return s.admission_no.toLowerCase().indexOf(filterAdmission) !== -1;
-            });
         }
         return students;
     }
