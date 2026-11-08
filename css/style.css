@@ -581,12 +581,12 @@ th, td {
    vertical-align: middle;
 }
 th {
-   background: var(--primary);
-   color: #ffffff;
+   background: var(--surface-2);
+   color: var(--text);
    font-weight: 600;
    font-size: var(--fs-xs);
    letter-spacing: .01em;
-   border-bottom-color: var(--primary-deep);
+   border-bottom-color: var(--border);
    white-space: nowrap;
 }
 tbody tr:last-child td, tr:last-child td { border-bottom: none; }
