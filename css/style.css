@@ -582,7 +582,7 @@ th, td {
 }
 th {
    background: var(--primary);
-   color: #e0e7ff;
+   color: #ffffff;
    font-weight: 600;
    font-size: var(--fs-xs);
    letter-spacing: .01em;

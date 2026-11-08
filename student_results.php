@@ -89,6 +89,7 @@ require_once __DIR__ . '/includes/header.php';
 <div class="card report-card" id="report-card">
     <!-- Report Header -->
     <div class="report-header">
+        <img class="report-logo" src="icons/icon-192.png" alt="School Logo">
         <div class="report-school">Green Valley Secondary School</div>
         <div class="report-title">Student Academic Report</div>
         <div class="report-student">
@@ -154,6 +155,9 @@ require_once __DIR__ . '/includes/header.php';
     <p>
         <button class="btn btn-primary" onclick="window.print()">
             <i class="fa-solid fa-print"></i> Print Report
+        </button>
+        <button class="btn btn-secondary" onclick="downloadPdf()">
+            <i class="fa-solid fa-file-pdf"></i> Download PDF
         </button>
         <a class="btn btn-secondary" href="student_results.php?download=csv">
             <i class="fa-solid fa-file-csv"></i> Download CSV
@@ -253,6 +257,12 @@ require_once __DIR__ . '/includes/header.php';
     padding-bottom: 15px;
     margin-bottom: 20px;
 }
+.report-logo {
+    width: 70px;
+    height: 70px;
+    margin-bottom: 8px;
+    object-fit: contain;
+}
 .report-school {
     font-size: 20px;
     font-weight: 700;
@@ -324,5 +334,32 @@ require_once __DIR__ . '/includes/header.php';
     margin-top: 5px;
 }
 </style>
+
+<!-- html2pdf.js for PDF download -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+<script>
+function downloadPdf() {
+    const element = document.getElementById('report-card');
+    const name = '<?= e($studentInfo['full_name'] ?? 'student') ?>';
+    const filename = name.replace(/[^a-zA-Z0-9]/g, '_') + '_results.pdf';
+    
+    const opt = {
+        margin: 10,
+        filename: filename,
+        image: { type: 'jpeg', quality: 0.98 },
+        html2canvas: { scale: 2, useCORS: true },
+        jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+    };
+    
+    // Hide buttons during PDF generation
+    const noPrint = document.querySelectorAll('.no-print');
+    noPrint.forEach(el => el.style.display = 'none');
+    
+    html2pdf().set(opt).from(element).save().then(() => {
+        // Show buttons again
+        noPrint.forEach(el => el.style.display = '');
+    });
+}
+</script>
 
 <?php require_once __DIR__ . '/includes/footer.php'; ?>
