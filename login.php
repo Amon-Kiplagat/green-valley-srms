@@ -555,7 +555,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['student_login'])) {
 </head>
 <body>
 
-  <div class="slide-container" id="slideContainer">
+  <div class="slide-container" id="slideContainer"<?php if ($staffError !== ''): ?> class="panel-active"<?php endif; ?>>
 
     <!-- 1. STUDENT LOGIN FORM (LEFT) -->
     <div class="form-box student-box">
