@@ -184,13 +184,16 @@ if ($resetLink !== '') {
 
         <?php if ($resetLink !== ''): ?>
             <div class="alert alert-info">
+                <p style="margin:0 0 8px;font-weight:600;color:#1e293b;">
+                    <i class="fa-solid fa-link"></i> Your password reset link is ready:
+                </p>
                 <div class="reset-link-box">
-                    <a href="<?= htmlspecialchars($resetLink) ?>" target="_blank">
-                        <i class="fa-solid fa-link"></i> <?= htmlspecialchars($resetLink) ?>
+                    <a href="<?= htmlspecialchars($resetLink) ?>" target="_blank" style="display:inline-block; background:#22c55e; color:white; padding:12px 24px; border-radius:8px; text-decoration:none; font-weight:700; font-size:15px;">
+                        <i class="fa-solid fa-key"></i> Click Here to Reset Password
                     </a>
                 </div>
                 <p style="margin:8px 0 0;font-size:12px;color:#64748b;">
-                    Click the link above to reset your password. The link expires in 1 hour.
+                    Click the button above to open the reset page. The link expires in 1 hour.
                 </p>
             </div>
         <?php endif; ?>
