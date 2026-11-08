@@ -579,7 +579,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['student_login'])) {
           <label for="student-username">Username</label>
           <div class="input-wrapper">
             <input type="text" id="student-username" name="username"
-                   value="<?= e($_POST['username'] ?? '') ?>"
                    placeholder="Enter your username" required>
             <i class="fa-solid fa-user-graduate input-icon"></i>
           </div>
@@ -633,7 +632,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['student_login'])) {
           <label for="staff-username">Username</label>
           <div class="input-wrapper">
             <input type="text" id="staff-username" name="username"
-                   value="<?= e($_POST['username'] ?? '') ?>"
                    placeholder="Enter username" required>
             <i class="fa-solid fa-user-shield input-icon"></i>
           </div>
