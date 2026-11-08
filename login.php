@@ -416,6 +416,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['student_login'])) {
             height: 16px;
         }
 
+        .forgot-link {
+            color: #6366f1;
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        .forgot-link:hover {
+            text-decoration: underline;
+        }
 
         /* --- BUTTONS --- */
         .btn-submit {
@@ -586,6 +595,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['student_login'])) {
           </div>
         </div>
 
+        <div class="form-options" style="margin-bottom: 18px;">
+          <span></span>
+          <a href="reset-password.php" class="forgot-link">Forgot password?</a>
+        </div>
 
         <button type="submit" class="btn-submit">Sign In as Student</button>
 
@@ -640,6 +653,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['student_login'])) {
           <label class="remember-me">
             <input type="checkbox"> Remember device
           </label>
+          <a href="reset-password.php" class="forgot-link">Forgot password?</a>
         </div>
 
         <button type="submit" class="btn-submit" style="background: #7e22ce;">Sign In to Staff Portal</button>
