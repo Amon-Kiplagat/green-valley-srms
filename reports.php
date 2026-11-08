@@ -16,11 +16,16 @@ require_login();
 
 $pdo = db();
 
-$students = $pdo->query('SELECT student_id, admission_no, full_name FROM students ORDER BY full_name')->fetchAll();
+$students = $pdo->query('SELECT student_id, admission_no, full_name, class_id FROM students ORDER BY full_name')->fetchAll();
 $exams    = $pdo->query('SELECT exam_id, exam_name, term, year FROM exams ORDER BY year DESC, term')->fetchAll();
+$classes  = $pdo->query('SELECT class_id, class_name FROM classes ORDER BY class_name')->fetchAll();
+$subjects = $pdo->query('SELECT subject_id, subject_name FROM subjects ORDER BY subject_name')->fetchAll();
 
 $studentId = (int)input('student_id');
 $examId    = (int)input('exam_id');
+$filterAdmission = trim(input('filter_admission') ?? '');
+$filterClass     = (int)input('filter_class');
+$filterSubject   = (int)input('filter_subject');
 
 $student = null;
 $rows    = [];
@@ -48,6 +53,10 @@ if ($studentId > 0) {
     if ($examId > 0) {
         $sql .= " AND r.exam_id = :eid";
         $params[':eid'] = $examId;
+    }
+    if ($filterSubject > 0) {
+        $sql .= " AND r.subject_id = :subId";
+        $params[':subId'] = $filterSubject;
     }
     $sql .= " ORDER BY e.year DESC, e.term, sub.subject_name";
     $stmt = $pdo->prepare($sql);
@@ -116,6 +125,38 @@ require_once __DIR__ . '/includes/header.php';
     <h2>Generate Report</h2>
     <form action="reports.php" method="get" class="inline" id="reportForm"
           style="display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:15px;">
+        <!-- Filter: Admission Number -->
+        <div>
+            <label>Admission Number</label>
+            <input type="text" name="filter_admission" placeholder="e.g., GV/2024/001" value="<?= e($filterAdmission) ?>"
+                   style="width:100%;padding:8px 12px;border:1px solid #d1d5db;border-radius:6px;font-size:14px;">
+        </div>
+        <!-- Filter: Class -->
+        <div>
+            <label>Class</label>
+            <select name="filter_class"
+                    style="width:100%;padding:8px 12px;border:1px solid #d1d5db;border-radius:6px;font-size:14px;">
+                <option value="0">-- All classes --</option>
+                <?php foreach ($classes as $cl): ?>
+                    <option value="<?= e($cl['class_id']) ?>" <?= ($filterClass == $cl['class_id']) ? 'selected' : '' ?>>
+                        <?= e($cl['class_name']) ?>
+                    </option>
+                <?php endforeach; ?>
+            </select>
+        </div>
+        <!-- Filter: Subject -->
+        <div>
+            <label>Subject</label>
+            <select name="filter_subject"
+                    style="width:100%;padding:8px 12px;border:1px solid #d1d5db;border-radius:6px;font-size:14px;">
+                <option value="0">-- All subjects --</option>
+                <?php foreach ($subjects as $sb): ?>
+                    <option value="<?= e($sb['subject_id']) ?>" <?= ($filterSubject == $sb['subject_id']) ? 'selected' : '' ?>>
+                        <?= e($sb['subject_name']) ?>
+                    </option>
+                <?php endforeach; ?>
+            </select>
+        </div>
         <div>
             <label>Search Student</label>
             <input type="text" id="studentSearch" placeholder="Type admission no or name..." autocomplete="off"
@@ -134,7 +175,12 @@ require_once __DIR__ . '/includes/header.php';
                     </option>
                 <?php endforeach; ?>
             </select></div>
-        <div style="align-self:end;"><button type="submit">Generate Report</button></div>
+        <div style="align-self:end;">
+            <button type="submit">Generate Report</button>
+            <?php if ($filterAdmission || $filterClass > 0 || $filterSubject > 0): ?>
+                <a href="reports.php" class="btn-sm" style="margin-left:8px;color:var(--primary);text-decoration:none;">Clear Filters</a>
+            <?php endif; ?>
+        </div>
     </form>
 </div>
 
@@ -143,7 +189,11 @@ require_once __DIR__ . '/includes/header.php';
     var allStudents = <?= json_encode($students, JSON_HEX_TAG | JSON_HEX_APOS) ?>;
     var searchInput = document.getElementById('studentSearch');
     var selectEl    = document.getElementById('studentSelect');
+    var classSelect = document.querySelector('select[name="filter_class"]');
+    var admissionInput = document.querySelector('input[name="filter_admission"]');
     var selectedId  = <?= (int)$studentId ?>;
+    var filterClassId = <?= $filterClass ?>;
+    var filterAdmission = '<?= addslashes($filterAdmission) ?>'.toLowerCase();
 
     function populateList(list) {
         selectEl.innerHTML = '<option value="">-- Select Student --</option>';
@@ -158,24 +208,40 @@ require_once __DIR__ . '/includes/header.php';
         }
     }
 
-    // Initial load
-    populateList(allStudents);
+    function getFilteredStudents() {
+        var students = allStudents;
+        // Filter by class
+        if (filterClassId > 0) {
+            students = students.filter(function(s) { return parseInt(s.class_id) === filterClassId; });
+        }
+        // Filter by admission number from the filter input
+        if (filterAdmission) {
+            students = students.filter(function(s) {
+                return s.admission_no.toLowerCase().indexOf(filterAdmission) !== -1;
+            });
+        }
+        return students;
+    }
+
+    // Initial load with server-side filters applied
+    populateList(getFilteredStudents());
 
     // Restore selected value after populate
     if (selectedId > 0) {
         selectEl.value = selectedId;
     }
 
-    // Filter on type
+    // Filter on type (search box)
     searchInput.addEventListener('input', function() {
         var q = this.value.toLowerCase().trim();
+        var base = getFilteredStudents();
         if (q === '') {
-            populateList(allStudents);
+            populateList(base);
             return;
         }
         var filtered = [];
-        for (var i = 0; i < allStudents.length; i++) {
-            var s = allStudents[i];
+        for (var i = 0; i < base.length; i++) {
+            var s = base[i];
             if (s.admission_no.toLowerCase().indexOf(q) !== -1 || s.full_name.toLowerCase().indexOf(q) !== -1) {
                 filtered.push(s);
             }
