@@ -61,10 +61,6 @@ $staffNav = [
         'profile.php'   => ['Profile', 'profile'],
     ],
     'Records' => [
-        'students.php'         => ['Students', 'students'],
-        'teachers.php'         => ['Teachers', 'teachers'],
-        'teacher_accounts.php' => ['Teacher Accounts', 'teachers'],
-        'classes.php'          => ['Classes',  'classes'],
         'subjects.php'         => ['Subjects', 'subjects'],
     ],
     'Assessment' => [
