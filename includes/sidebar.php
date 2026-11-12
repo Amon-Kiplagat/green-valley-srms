@@ -54,8 +54,31 @@ $studentNav = [
     'student_password.php'  => ['Profile',   'profile'],
 ];
 
-/** Admin/teacher nav: full navigation. */
-$staffNav = [
+/** Check if current user is admin. */
+$isAdmin = $loggedIn && function_exists('current_role') && current_role() === 'admin';
+
+/** Admin nav: full navigation — admin oversees everything. */
+$adminNav = [
+    'Overview' => [
+        'dashboard.php'      => ['Dashboard', 'dashboard'],
+        'profile.php'        => ['Profile', 'profile'],
+    ],
+    'Records' => [
+        'students.php'         => ['Students', 'students'],
+        'teachers.php'         => ['Teachers', 'teachers'],
+        'teacher_accounts.php' => ['Teacher Accounts', 'teachers'],
+        'classes.php'          => ['Classes', 'classes'],
+        'subjects.php'         => ['Subjects', 'subjects'],
+    ],
+    'Assessment' => [
+        'exams.php'   => ['Exams',   'exams'],
+        'results.php' => ['Results', 'results'],
+        'reports.php' => ['Reports', 'reports'],
+    ],
+];
+
+/** Teacher nav: reduced navigation. */
+$teacherNav = [
     'Overview' => [
         'dashboard.php' => ['Dashboard', 'dashboard'],
         'profile.php'   => ['Profile', 'profile'],
@@ -83,8 +106,19 @@ $staffNav = [
                     <?= $navIcon($icon) ?><span><?= e($text) ?></span>
                 </a>
             <?php endforeach; ?>
+        <?php elseif ($isAdmin): ?>
+            <?php foreach ($adminNav as $label => $links): ?>
+                <div class="nav-group">
+                    <div class="nav-label"><?= e($label) ?></div>
+                    <?php foreach ($links as $file => [$text, $icon]): ?>
+                        <a class="<?= $navClass($file) ?>" href="<?= e($file) ?>"<?= $navClass($file) ? ' aria-current="page"' : '' ?>>
+                            <?= $navIcon($icon) ?><span><?= e($text) ?></span>
+                        </a>
+                    <?php endforeach; ?>
+                </div>
+            <?php endforeach; ?>
         <?php else: ?>
-            <?php foreach ($staffNav as $label => $links): ?>
+            <?php foreach ($teacherNav as $label => $links): ?>
                 <div class="nav-group">
                     <div class="nav-label"><?= e($label) ?></div>
                     <?php foreach ($links as $file => [$text, $icon]): ?>
