@@ -84,9 +84,8 @@ require_once __DIR__ . '/includes/header.php';
         <div>
             <label>Date of Birth</label>
             <input type="date" name="date_of_birth" value="<?= e($editing['date_of_birth'] ?? '') ?>"
-                   min="<?= (new DateTime())->modify('-15 years')->format('Y-m-d') ?>"
                    max="<?= (new DateTime())->modify('-14 years')->format('Y-m-d') ?>">
-            <small class="field-hint">Student must be 14–15 years old (born between <?= (new DateTime())->modify('-15 years')->format('Y') ?> and <?= (new DateTime())->modify('-14 years')->format('Y') ?>).</small>
+            <small class="field-hint">Student must be 14 years or older (born before <?= (new DateTime())->modify('-14 years')->format('Y') ?>).</small>
         </div>
         <div>
             <label>Class</label>

@@ -90,13 +90,13 @@ if ($action === 'create' || $action === 'update') {
         $gender = 'Male';
     }
 
-    // Validate date of birth: student must be 14 or 15 years old (joining high school).
+    // Validate date of birth: student must be 14 years or older (joining high school).
     if ($dob !== '') {
         $dobDate  = DateTime::createFromFormat('Y-m-d', $dob);
         $now      = new DateTime();
         $age      = $now->diff($dobDate)->y;
-        if ($age < 14 || $age > 15) {
-            set_flash('error', 'Date of birth must correspond to an age of 14–15 years for high school admission.');
+        if ($age < 14) {
+            set_flash('error', 'Date of birth must correspond to an age of 14 years or older for high school admission.');
             redirect($action === 'update' ? "students.php?edit=$studentId" : 'students.php');
         }
     }
