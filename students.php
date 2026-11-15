@@ -1,12 +1,4 @@
 <?php
-/**
- * students.php
- * ---------------------------------------------------------------------------
- * Student management: add, view, search, edit, delete. Joins the classes
- * table so each student's class is shown/selected. Replaces students.html.
- * ---------------------------------------------------------------------------
- */
-
 declare(strict_types=1);
 
 require_once __DIR__ . '/includes/auth.php';
@@ -15,10 +7,8 @@ require_login();
 
 $pdo = db();
 
-// Class list for the dropdown.
 $classes = $pdo->query('SELECT class_id, class_name FROM classes ORDER BY class_name')->fetchAll();
 
-// If editing, load the student being edited.
 $editing = null;
 if (isset($_GET['edit'])) {
     $stmt = $pdo->prepare('SELECT * FROM students WHERE student_id = :id');
@@ -30,7 +20,6 @@ if (isset($_GET['edit'])) {
     }
 }
 
-// Search term (safe: used only as a bound ILIKE parameter).
 $search = input('q');
 
 $sql = "SELECT s.student_id, s.admission_no, s.full_name, s.gender,
@@ -273,12 +262,10 @@ require_once __DIR__ . '/includes/header.php';
         manageActions.style.display = 'none';
     }
 
-    // Close on backdrop click
     modal.addEventListener('click', function(ev){
         if(ev.target === modal) closeModal();
     });
 
-    // Close on data-close-modal links
     document.querySelectorAll('[data-close-modal]').forEach(function(link){
         link.addEventListener('click', function(ev){
             ev.preventDefault();
@@ -286,7 +273,6 @@ require_once __DIR__ . '/includes/header.php';
         });
     });
 
-    // Open modal
     document.querySelectorAll('[data-open-portal-modal]').forEach(function(link){
         link.addEventListener('click', function(ev){
             ev.preventDefault();
@@ -297,7 +283,6 @@ require_once __DIR__ . '/includes/header.php';
             modalStudent.textContent = studentName;
 
             if(!username){
-                // Enable form
                 modalTitle.innerHTML = '<i class="fa-solid fa-key"></i> Create Portal Account';
                 document.getElementById('portal-enable-student-id').value = studentId;
                 enableForm.style.display = 'block';
@@ -307,7 +292,6 @@ require_once __DIR__ . '/includes/header.php';
                 document.getElementById('portal-username').value = '';
                 document.getElementById('portal-password').value = '';
             } else {
-                // Manage form
                 modalTitle.innerHTML = '<i class="fa-solid fa-key"></i> Manage Portal Account';
                 document.getElementById('portal-manage-student-id').value = studentId;
                 document.getElementById('portal-manage-username').textContent = username;
@@ -322,14 +306,12 @@ require_once __DIR__ . '/includes/header.php';
         });
     });
 
-    // Show reset password form
     document.getElementById('show-reset-btn').addEventListener('click', function(){
         enableForm.style.display = 'none';
         manageForm.style.display = 'block';
         disableForm.style.display = 'none';
     });
 
-    // Show disable form
     document.getElementById('show-disable-btn').addEventListener('click', function(){
         enableForm.style.display = 'none';
         manageForm.style.display = 'none';

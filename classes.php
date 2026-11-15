@@ -1,13 +1,4 @@
 <?php
-/**
- * classes.php
- * ---------------------------------------------------------------------------
- * Class management: add, view, edit, delete, and assign a class teacher
- * (classes.teacher_id -> teachers.teacher_id). Admin-only management.
- * Replaces classes.html.
- * ---------------------------------------------------------------------------
- */
-
 declare(strict_types=1);
 
 require_once __DIR__ . '/includes/auth.php';
@@ -25,7 +16,6 @@ if (isset($_GET['edit']) && is_admin()) {
     if (!$editing) { set_flash('error', 'Class not found.'); redirect('classes.php'); }
 }
 
-// List classes with the assigned teacher and a live student count.
 $classes = $pdo->query(
     "SELECT c.class_id, c.class_name, c.room,
             t.full_name AS teacher_name,

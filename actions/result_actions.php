@@ -1,11 +1,4 @@
 <?php
-/**
- * actions/result_actions.php
- * ---------------------------------------------------------------------------
- * Server-side handler for results (marks) CRUD.
- * Called via POST from results.php.
- * ---------------------------------------------------------------------------
- */
 
 declare(strict_types=1);
 
@@ -15,9 +8,6 @@ require_login();
 $pdo = db();
 $action = (string)($_POST['action'] ?? $_GET['action'] ?? '');
 
-/* ------------------------------------------------------------------ */
-/* DELETE (via GET with CSRF token in URL)                             */
-/* ------------------------------------------------------------------ */
 if ($action === 'delete') {
     require_role('admin');
     verify_csrf();
@@ -28,7 +18,6 @@ if ($action === 'delete') {
         redirect('results.php');
     }
 
-    // Fetch context for audit log.
     $stmt = $pdo->prepare(
         'SELECT s.full_name, s.admission_no, sub.subject_name, e.exam_name, e.term, e.year
            FROM results r
@@ -54,9 +43,6 @@ if ($action === 'delete') {
     redirect('results.php');
 }
 
-/* ------------------------------------------------------------------ */
-/* POST actions: create / update                                      */
-/* ------------------------------------------------------------------ */
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     http_response_code(405);
     die('Method not allowed.');
@@ -71,7 +57,6 @@ if ($action === 'create' || $action === 'update') {
     $examId    = (int)($_POST['exam_id'] ?? 0);
     $marks     = (float)($_POST['marks'] ?? 0);
 
-    // Validation.
     if ($studentId <= 0 || $subjectId <= 0 || $examId <= 0) {
         set_flash('error', 'Student, subject and exam are required.');
         redirect('results.php');
@@ -85,7 +70,7 @@ if ($action === 'create' || $action === 'update') {
     $grade = calculate_grade($marks);
 
     if ($action === 'create') {
-        // Check for duplicate.
+        // Duplicate check.
         $stmt = $pdo->prepare(
             'SELECT result_id FROM results
                WHERE student_id = :sid AND subject_id = :subid AND exam_id = :eid
@@ -113,7 +98,6 @@ if ($action === 'create' || $action === 'update') {
             ':grade' => $grade,
         ]);
 
-        // Fetch context for audit log.
         $stmt = $pdo->prepare(
             'SELECT s.full_name, s.admission_no, sub.subject_name, e.exam_name
                FROM students s
@@ -139,7 +123,6 @@ if ($action === 'create' || $action === 'update') {
             ':id'    => $resultId,
         ]);
 
-        // Fetch context for audit log.
         $stmt = $pdo->prepare(
             'SELECT s.full_name, s.admission_no, sub.subject_name, e.exam_name
                FROM results r
@@ -158,8 +141,5 @@ if ($action === 'create' || $action === 'update') {
     redirect('results.php');
 }
 
-/* ------------------------------------------------------------------ */
-/* Fallback                                                           */
-/* ------------------------------------------------------------------ */
 set_flash('error', 'Unknown action.');
 redirect('results.php');

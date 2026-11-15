@@ -1,11 +1,4 @@
 <?php
-/**
- * profile.php
- * ---------------------------------------------------------------------------
- * Staff profile page — change your own password.
- * ---------------------------------------------------------------------------
- */
-
 declare(strict_types=1);
 
 require_once __DIR__ . '/includes/auth.php';
@@ -47,7 +40,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 
-// Load current user info
 $stmt = $pdo->prepare('SELECT full_name, username, role FROM users WHERE user_id = :id');
 $stmt->execute([':id' => (int)$_SESSION['user_id']]);
 $profile = $stmt->fetch();

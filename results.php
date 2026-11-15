@@ -1,13 +1,4 @@
 <?php
-/**
- * results.php
- * ---------------------------------------------------------------------------
- * Marks / results interface. Authorised users (admin or teacher) select a
- * student, subject and examination, enter marks, and the grade is calculated
- * automatically. Duplicate (student, subject, exam) combinations are blocked.
- * ---------------------------------------------------------------------------
- */
-
 declare(strict_types=1);
 
 require_once __DIR__ . '/includes/auth.php';
@@ -15,12 +6,10 @@ require_login();   // both admins and teachers may record marks
 
 $pdo = db();
 
-// Dropdown data.
 $students = $pdo->query('SELECT student_id, admission_no, full_name FROM students ORDER BY full_name')->fetchAll();
 $subjects = $pdo->query('SELECT subject_id, subject_name FROM subjects ORDER BY subject_name')->fetchAll();
 $exams    = $pdo->query('SELECT exam_id, exam_name, term, year FROM exams ORDER BY year DESC, term')->fetchAll();
 
-// Edit mode: load an existing result.
 $editing = null;
 if (isset($_GET['edit'])) {
     $stmt = $pdo->prepare('SELECT * FROM results WHERE result_id = :id');
@@ -29,7 +18,6 @@ if (isset($_GET['edit'])) {
     if (!$editing) { set_flash('error', 'Result not found.'); redirect('results.php'); }
 }
 
-// Optional filter by exam for the list.
 $filterExam = (int)input('exam_id_filter');
 
 $sql = "SELECT r.result_id, r.marks, r.grade,

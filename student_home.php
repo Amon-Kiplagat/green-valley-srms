@@ -1,18 +1,10 @@
 <?php
-/**
- * student_home.php
- * ---------------------------------------------------------------------------
- * Student portal home page — shows student info and links to results.
- * ---------------------------------------------------------------------------
- */
-
 declare(strict_types=1);
 
 require_once __DIR__ . '/includes/auth.php';
 require_once __DIR__ . '/includes/student_portal.php';
 require_student();
 
-// Redirect to password change if required
 if (!empty($_SESSION['portal_must_change'])) {
     redirect('student_password.php');
 }

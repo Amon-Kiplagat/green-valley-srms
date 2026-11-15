@@ -1,11 +1,4 @@
 <?php
-/**
- * student_exams.php
- * ---------------------------------------------------------------------------
- * Student portal — view examinations the student has results for.
- * ---------------------------------------------------------------------------
- */
-
 declare(strict_types=1);
 
 require_once __DIR__ . '/includes/auth.php';
@@ -14,7 +7,6 @@ require_student();
 
 $pdo = db();
 
-// Get all exams where the student has results.
 $stmt = $pdo->prepare(
     "SELECT e.exam_id, e.exam_name, e.term, e.year,
             COUNT(r.result_id) AS subject_count,
@@ -30,14 +22,12 @@ $stmt = $pdo->prepare(
 $stmt->execute([':id' => $_SESSION['student_id']]);
 $studentExams = $stmt->fetchAll();
 
-// Get all exams in the system (for showing upcoming/exams without results yet).
 $allExams = $pdo->query(
     "SELECT e.exam_id, e.exam_name, e.term, e.year
        FROM exams e
       ORDER BY e.year DESC, e.term, e.exam_name"
 )->fetchAll();
 
-// Build a set of exam IDs the student has results for.
 $studentExamIds = array_column($studentExams, 'exam_id');
 
 $page_title = 'My Exams';

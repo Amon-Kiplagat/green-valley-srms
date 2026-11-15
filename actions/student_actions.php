@@ -1,11 +1,4 @@
 <?php
-/**
- * actions/student_actions.php
- * ---------------------------------------------------------------------------
- * Server-side handler for student CRUD and portal account management.
- * Called via POST from students.php.
- * ---------------------------------------------------------------------------
- */
 
 declare(strict_types=1);
 
@@ -16,9 +9,6 @@ require_login();
 $pdo = db();
 $action = (string)($_POST['action'] ?? $_GET['action'] ?? '');
 
-/* ------------------------------------------------------------------ */
-/* DELETE (via GET with CSRF token in URL)                             */
-/* ------------------------------------------------------------------ */
 if ($action === 'delete') {
     require_role('admin');
     verify_csrf();
@@ -29,7 +19,6 @@ if ($action === 'delete') {
         redirect('students.php');
     }
 
-    // Fetch name for flash message.
     $stmt = $pdo->prepare('SELECT full_name, admission_no FROM students WHERE student_id = :id');
     $stmt->execute([':id' => $studentId]);
     $student = $stmt->fetch();
@@ -41,7 +30,6 @@ if ($action === 'delete') {
 
     $label = $student['full_name'] . ' (' . $student['admission_no'] . ')';
 
-    // Delete related results first (CASCADE handles it, but be explicit).
     $pdo->prepare('DELETE FROM results WHERE student_id = :id')
         ->execute([':id' => $studentId]);
 
@@ -53,9 +41,6 @@ if ($action === 'delete') {
     redirect('students.php');
 }
 
-/* ------------------------------------------------------------------ */
-/* POST actions: create / update / enable_portal / disable_portal      */
-/* ------------------------------------------------------------------ */
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     http_response_code(405);
     die('Method not allowed.');
@@ -72,7 +57,6 @@ if ($action === 'create' || $action === 'update') {
     $classId     = (int)($_POST['class_id'] ?? 0);
     $guardian    = trim((string)($_POST['guardian_name'] ?? ''));
 
-    // Phone normalisation.
     $phoneResult = normalize_phone((string)($_POST['guardian_phone'] ?? ''));
     if (!$phoneResult['ok']) {
         set_flash('error', $phoneResult['error']);
@@ -80,7 +64,6 @@ if ($action === 'create' || $action === 'update') {
     }
     $guardianPhone = $phoneResult['value'];
 
-    // Validation.
     if ($admissionNo === '' || $fullName === '') {
         set_flash('error', 'Admission number and full name are required.');
         redirect($action === 'update' ? "students.php?edit=$studentId" : 'students.php');
@@ -90,7 +73,6 @@ if ($action === 'create' || $action === 'update') {
         $gender = 'Male';
     }
 
-    // Validate date of birth: student must be 14 years or older (joining high school).
     if ($dob !== '') {
         $dobDate  = DateTime::createFromFormat('Y-m-d', $dob);
         $now      = new DateTime();
@@ -101,7 +83,6 @@ if ($action === 'create' || $action === 'update') {
         }
     }
 
-    // Check admission_no uniqueness.
     $stmt = $pdo->prepare(
         'SELECT student_id FROM students WHERE admission_no = :an AND student_id != :id LIMIT 1'
     );
@@ -159,9 +140,6 @@ if ($action === 'create' || $action === 'update') {
     }
 }
 
-/* ------------------------------------------------------------------ */
-/* PORTAL ACCOUNT MANAGEMENT                                          */
-/* ------------------------------------------------------------------ */
 if ($action === 'enable_portal') {
     require_role('admin');
 
@@ -174,7 +152,6 @@ if ($action === 'enable_portal') {
         redirect('students.php');
     }
 
-    // Load student info.
     $stmt = $pdo->prepare(
         'SELECT s.student_id, s.full_name, s.admission_no, s.portal_enabled
            FROM students s
@@ -193,13 +170,11 @@ if ($action === 'enable_portal') {
         redirect('students.php');
     }
 
-    // Validate username.
     if ($portalUsername === '' || strlen($portalUsername) < 3) {
         set_flash('error', 'Portal username must be at least 3 characters.');
         redirect('students.php');
     }
 
-    // Check uniqueness.
     $stmt = $pdo->prepare(
         'SELECT student_id FROM students WHERE portal_username IS NOT NULL AND lower(portal_username) = lower(:u) AND student_id != :id LIMIT 1'
     );
@@ -209,7 +184,6 @@ if ($action === 'enable_portal') {
         redirect('students.php');
     }
 
-    // Validate password.
     if ($portalPassword === '' || strlen($portalPassword) < 6) {
         set_flash('error', 'Default password must be at least 6 characters.');
         redirect('students.php');
@@ -320,8 +294,5 @@ if ($action === 'reset_portal_password') {
     redirect('students.php');
 }
 
-/* ------------------------------------------------------------------ */
-/* Fallback                                                           */
-/* ------------------------------------------------------------------ */
 set_flash('error', 'Unknown action.');
 redirect('students.php');

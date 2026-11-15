@@ -1,11 +1,4 @@
 <?php
-/**
- * actions/teacher_actions.php
- * ---------------------------------------------------------------------------
- * Server-side handler for teacher CRUD and password management.
- * Called via POST/GET from teachers.php.
- * ---------------------------------------------------------------------------
- */
 
 declare(strict_types=1);
 
@@ -15,9 +8,6 @@ require_login();
 $pdo = db();
 $action = (string)($_POST['action'] ?? $_GET['action'] ?? '');
 
-/* ------------------------------------------------------------------ */
-/* DELETE (via GET with CSRF token in URL)                             */
-/* ------------------------------------------------------------------ */
 if ($action === 'delete') {
     require_role('admin');
     verify_csrf();
@@ -28,7 +18,6 @@ if ($action === 'delete') {
         redirect('teachers.php');
     }
 
-    // Fetch name for flash message.
     $stmt = $pdo->prepare('SELECT full_name, staff_no FROM teachers WHERE teacher_id = :id');
     $stmt->execute([':id' => $teacherId]);
     $teacher = $stmt->fetch();
@@ -40,7 +29,6 @@ if ($action === 'delete') {
 
     $label = $teacher['full_name'] . ' (' . $teacher['staff_no'] . ')';
 
-    // Nullify references instead of deleting (teachers may be assigned to classes/subjects).
     $pdo->prepare('UPDATE classes SET teacher_id = NULL WHERE teacher_id = :id')
         ->execute([':id' => $teacherId]);
     $pdo->prepare('UPDATE subjects SET teacher_id = NULL WHERE teacher_id = :id')
@@ -56,9 +44,6 @@ if ($action === 'delete') {
     redirect('teachers.php');
 }
 
-/* ------------------------------------------------------------------ */
-/* POST actions                                                        */
-/* ------------------------------------------------------------------ */
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     http_response_code(405);
     die('Method not allowed.');
@@ -66,9 +51,6 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 
 verify_csrf();
 
-/* ------------------------------------------------------------------ */
-/* CREATE / UPDATE teacher                                            */
-/* ------------------------------------------------------------------ */
 if ($action === 'create' || $action === 'update') {
     require_role('admin');
 
@@ -79,7 +61,6 @@ if ($action === 'create' || $action === 'update') {
     $phoneRaw  = trim((string)($_POST['phone'] ?? ''));
     $email     = trim((string)($_POST['email'] ?? ''));
 
-    // Validation.
     if ($staffNo === '' || $fullName === '') {
         set_flash('error', 'Staff number and full name are required.');
         redirect($action === 'update' ? "teachers.php?edit=$teacherId" : 'teachers.php');
@@ -89,7 +70,6 @@ if ($action === 'create' || $action === 'update') {
         $gender = 'Male';
     }
 
-    // Phone normalisation.
     $phoneResult = function_exists('normalize_phone') ? normalize_phone($phoneRaw) : ['ok' => true, 'value' => $phoneRaw];
     if (!$phoneResult['ok']) {
         set_flash('error', $phoneResult['error'] ?? 'Invalid phone number.');
@@ -97,7 +77,6 @@ if ($action === 'create' || $action === 'update') {
     }
     $phone = $phoneResult['value'];
 
-    // Check staff_no uniqueness.
     $stmt = $pdo->prepare(
         'SELECT teacher_id FROM teachers WHERE staff_no = :sn AND teacher_id != :id LIMIT 1'
     );
@@ -148,9 +127,6 @@ if ($action === 'create' || $action === 'update') {
     }
 }
 
-/* ------------------------------------------------------------------ */
-/* CHANGE PASSWORD — admin resets a staff member's password            */
-/* ------------------------------------------------------------------ */
 if ($action === 'change_password') {
     require_role('admin');
 
@@ -173,7 +149,6 @@ if ($action === 'change_password') {
         redirect('teachers.php?change_password=' . $userId);
     }
 
-    // Load the user to verify existence.
     $stmt = $pdo->prepare(
         'SELECT u.user_id, u.username, u.full_name, u.role, t.full_name AS teacher_name
            FROM users u

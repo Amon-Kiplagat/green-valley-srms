@@ -1,25 +1,10 @@
 <?php
-/**
- * includes/student_portal.php
- * ---------------------------------------------------------------------------
- * Student portal session helpers, lockout logic, and access control.
- *
- * Include this where student portal functions are needed:
- *     require_once __DIR__ . '/includes/student_portal.php';
- * ---------------------------------------------------------------------------
- */
 
 declare(strict_types=1);
 
-/** Maximum consecutive failed attempts before lockout. */
 define('PORTAL_MAX_ATTEMPTS', 5);
-
-/** Lockout duration in minutes after max failures. */
 define('PORTAL_LOCK_MINUTES', 15);
 
-/**
- * Cast a PostgreSQL boolean column value to a PHP bool.
- */
 function db_bool($value): bool
 {
     if (is_bool($value)) {
@@ -31,17 +16,11 @@ function db_bool($value): bool
     return filter_var((string)$value, FILTER_VALIDATE_BOOLEAN);
 }
 
-/**
- * True if a student portal session is active.
- */
 function is_student(): bool
 {
     return !empty($_SESSION['student_id']);
 }
 
-/**
- * Block access unless a student is logged in. Redirects to login otherwise.
- */
 function require_student(): void
 {
     if (!is_student()) {
@@ -50,10 +29,6 @@ function require_student(): void
     }
 }
 
-/**
- * Log a student in from a matched students row (sets session state).
- * Regenerates the session id to prevent fixation.
- */
 function login_student(array $student, bool $mustChange = false): void
 {
     session_regenerate_id(true);
@@ -63,17 +38,11 @@ function login_student(array $student, bool $mustChange = false): void
     $_SESSION['portal_must_change'] = $mustChange;
 }
 
-/**
- * Return a human-readable lockout message.
- */
 function portal_lock_message(int $minutes): string
 {
     return 'Too many failed attempts. Please try again in ' . $minutes . ' minute' . ($minutes !== 1 ? 's' : '') . '.';
 }
 
-/**
- * Record a successful login: reset failed attempts and update last login.
- */
 function portal_record_success(PDO $pdo, int $studentId): void
 {
     $pdo->prepare(
@@ -85,10 +54,6 @@ function portal_record_success(PDO $pdo, int $studentId): void
     )->execute([':id' => $studentId]);
 }
 
-/**
- * Record a failed login attempt.
- * Returns true if the student has just hit the lockout threshold.
- */
 function portal_record_failure(PDO $pdo, int $studentId): bool
 {
     $stmt = $pdo->prepare(
@@ -110,9 +75,7 @@ function portal_record_failure(PDO $pdo, int $studentId): bool
     return $row !== false && (int)$row['portal_failed_attempts'] >= PORTAL_MAX_ATTEMPTS;
 }
 
-/**
- * Log a student portal lockout to the activity_log table (best-effort).
- */
+// Log student portal lockout to activity_log (best-effort).
 function portal_log_lockout(string $fullName, string $admissionNo): void
 {
     try {

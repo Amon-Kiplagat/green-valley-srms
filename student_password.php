@@ -1,11 +1,4 @@
 <?php
-/**
- * student_password.php
- * ---------------------------------------------------------------------------
- * Student portal — Profile page: view student info and change password.
- * ---------------------------------------------------------------------------
- */
-
 declare(strict_types=1);
 
 require_once __DIR__ . '/includes/auth.php';
@@ -14,7 +7,6 @@ require_student();
 
 $pdo = db();
 
-// Fetch student profile info.
 $stmt = $pdo->prepare(
     'SELECT s.full_name, s.admission_no, s.gender, c.class_name, c.teacher_id,
             t.full_name AS teacher_name

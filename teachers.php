@@ -1,14 +1,4 @@
 <?php
-/**
- * teachers.php
- * ---------------------------------------------------------------------------
- * Teacher management: add, view, search, edit, delete. Adding/editing/deleting
- * teachers is restricted to administrators; everyone signed in can view.
- * The "Subjects" column is derived live from the subjects table. Replaces
- * teachers.html.
- * ---------------------------------------------------------------------------
- */
-
 declare(strict_types=1);
 
 require_once __DIR__ . '/includes/auth.php';
@@ -16,7 +6,6 @@ require_login();
 
 $pdo = db();
 
-// If editing, load the teacher.
 $editing = null;
 if (isset($_GET['edit']) && is_admin()) {
     $stmt = $pdo->prepare('SELECT * FROM teachers WHERE teacher_id = :id');
@@ -28,7 +17,6 @@ if (isset($_GET['edit']) && is_admin()) {
     }
 }
 
-// If changing password, load the user account.
 $changePasswordUser = null;
 if (isset($_GET['change_password']) && is_admin()) {
     $cpId = (int)$_GET['change_password'];
@@ -48,7 +36,6 @@ if (isset($_GET['change_password']) && is_admin()) {
 
 $search = input('q');
 
-// List teachers with the subjects each one teaches (string_agg) and linked user account.
 $sql = "SELECT t.teacher_id, t.staff_no, t.full_name, t.gender, t.phone, t.email,
                COALESCE(string_agg(s.subject_name, ', ' ORDER BY s.subject_name), '') AS subjects,
                u.user_id AS user_id, u.username, u.role

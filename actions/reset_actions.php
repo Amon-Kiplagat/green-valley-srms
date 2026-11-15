@@ -1,22 +1,13 @@
 <?php
-/**
- * actions/reset_actions.php
- * ---------------------------------------------------------------------------
- * Handles password reset actions: request reset, verify token, update password.
- * The reset link is shown on-screen (no email).
- * ---------------------------------------------------------------------------
- */
 
 declare(strict_types=1);
 
 require_once __DIR__ . '/../includes/auth.php';
-require_once __DIR__ . '/../includes/mail.php';
 
 $pdo = db();
 $action = (string)($_POST['action'] ?? '');
 
 if ($action === 'request_reset') {
-    // User entered their email/username to request a reset.
     $email = trim((string)($_POST['email'] ?? ''));
 
     if ($email === '') {
@@ -24,7 +15,6 @@ if ($action === 'request_reset') {
         redirect('reset-password.php');
     }
 
-    // Look up the user by email.
     $stmt = $pdo->prepare(
         'SELECT user_id, username, full_name, email
            FROM users
@@ -35,15 +25,13 @@ if ($action === 'request_reset') {
     $user = $stmt->fetch();
 
     if (!$user) {
-        // Don't reveal whether the email exists.
         set_flash('success', 'If an account with that email exists, a reset link has been generated.');
         redirect('reset-password.php');
     }
 
-    // Generate a unique token and store it.
     $token = bin2hex(random_bytes(32));
     $hash  = hash('sha256', $token);
-    $expires = date('Y-m-d H:i:s', time() + 3600); // 1 hour
+    $expires = date('Y-m-d H:i:s', time() + 3600);
 
     $stmt = $pdo->prepare(
         'INSERT INTO reset_tokens (user_id, token_hash, expires_at)
@@ -51,7 +39,6 @@ if ($action === 'request_reset') {
     );
     $stmt->execute([':uid' => $user['user_id'], ':h' => $hash, ':exp' => $expires]);
 
-    // Build the reset link.
     $baseUrl = rtrim(getenv('APP_BASE_URL') ?: ($_SERVER['APP_BASE_URL'] ?: ''), '/');
     if ($baseUrl === '') {
         $protocol = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
@@ -61,7 +48,6 @@ if ($action === 'request_reset') {
     $baseUrl = rtrim($baseUrl, '/');
     $resetLink = $baseUrl . '/reset-password.php?token=' . $token;
 
-    // Show the reset link directly on-screen (no email).
     set_flash('success', 'Password reset link generated for ' . htmlspecialchars($user['full_name']) . '. Click the link below to reset your password:');
     set_flash('info', $resetLink);
 
@@ -88,7 +74,6 @@ if ($action === 'update_password') {
         redirect('reset-password.php?token=' . $token);
     }
 
-    // Verify the token.
     $hash = hash('sha256', $token);
     $stmt = $pdo->prepare(
         'SELECT rt.user_id, rt.expires_at, u.username, u.full_name
@@ -106,12 +91,10 @@ if ($action === 'update_password') {
         redirect('reset-password.php');
     }
 
-    // Update the password.
     $newHash = password_hash($password, PASSWORD_DEFAULT);
     $stmt = $pdo->prepare('UPDATE users SET password_hash = :h WHERE user_id = :id');
     $stmt->execute([':h' => $newHash, ':id' => $reset['user_id']]);
 
-    // Invalidate the token.
     $stmt = $pdo->prepare('DELETE FROM reset_tokens WHERE user_id = :id');
     $stmt->execute([':id' => $reset['user_id']]);
 
@@ -119,5 +102,4 @@ if ($action === 'update_password') {
     redirect('login.php');
 }
 
-// Invalid action.
 redirect('reset-password.php');

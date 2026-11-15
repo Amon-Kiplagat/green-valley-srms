@@ -1,19 +1,8 @@
 <?php
-/**
- * reset-password.php
- * ---------------------------------------------------------------------------
- * Password reset page. Three modes:
- * 1. Request reset — enter email to generate a reset link (shown on-screen).
- * 2. Reset form — click the link, enter new password.
- * 3. Success — password updated.
- * ---------------------------------------------------------------------------
- */
-
 declare(strict_types=1);
 
 require_once __DIR__ . '/includes/auth.php';
 
-// Already logged in? Go to dashboard.
 if (is_logged_in()) {
     redirect('dashboard.php');
 }
@@ -23,7 +12,6 @@ $error = '';
 $success = '';
 $resetLink = '';
 
-// Check for flash messages.
 if (isset($_SESSION['flash_success'])) {
     $success = $_SESSION['flash_success'];
     unset($_SESSION['flash_success']);
@@ -37,7 +25,6 @@ if (isset($_SESSION['flash_error'])) {
     unset($_SESSION['flash_error']);
 }
 
-// If a reset link was generated, show it.
 if ($resetLink !== '') {
     $success = 'Your password reset link is ready. Click the link below to reset your password:';
 }

@@ -1,13 +1,4 @@
 <?php
-/**
- * teacher_accounts.php
- * ---------------------------------------------------------------------------
- * Admin page to manage teacher login accounts: create accounts for teachers
- * who don't have one, reset passwords, and activate/deactivate accounts.
- * Only accessible to admins.
- * ---------------------------------------------------------------------------
- */
-
 declare(strict_types=1);
 
 require_once __DIR__ . '/includes/auth.php';
@@ -15,7 +6,6 @@ require_role('admin');
 
 $pdo = db();
 
-// Fetch all teachers with their login account status
 $sql = "SELECT t.teacher_id, t.staff_no, t.full_name, t.email, t.phone,
                u.user_id, u.username, u.is_active AS account_active
           FROM teachers t
@@ -182,7 +172,6 @@ require_once __DIR__ . '/includes/header.php';
 function showCreateForm(teacherId, name, email) {
     document.getElementById('createTeacherId').value = teacherId;
     document.getElementById('createTeacherName').textContent = name;
-    // Suggest username from email or name
     var suggested = '';
     if (email && email.indexOf('@') > 0) {
         suggested = email.split('@')[0];
@@ -204,7 +193,6 @@ function hideModal(id) {
     document.getElementById(id).style.display = 'none';
 }
 
-// Close modal on overlay click
 document.querySelectorAll('.modal-overlay').forEach(function (overlay) {
     overlay.addEventListener('click', function (e) {
         if (e.target === overlay) {

@@ -1,12 +1,4 @@
 <?php
-/**
- * student_reports.php
- * ---------------------------------------------------------------------------
- * Student portal — generate a printable report card for the logged-in student.
- * Auto-selects the student; the student picks an examination.
- * ---------------------------------------------------------------------------
- */
-
 declare(strict_types=1);
 
 require_once __DIR__ . '/includes/auth.php';
@@ -16,7 +8,6 @@ require_student();
 $pdo = db();
 $studentId = $_SESSION['student_id'];
 
-// Student info.
 $stmt = $pdo->prepare(
     "SELECT s.admission_no, s.full_name, s.gender, c.class_name
        FROM students s
@@ -26,7 +17,6 @@ $stmt = $pdo->prepare(
 $stmt->execute([':id' => $studentId]);
 $student = $stmt->fetch();
 
-// All exams for dropdown.
 $exams = $pdo->query(
     "SELECT exam_id, exam_name, term, year FROM exams ORDER BY year DESC, term"
 )->fetchAll();
@@ -37,7 +27,6 @@ $rows      = [];
 $summary   = ['count' => 0, 'total' => 0.0, 'average' => 0.0, 'grade' => '', 'position' => null, 'class_size' => null];
 
 if ($examId > 0) {
-    // Fetch marks for the chosen exam.
     $stmt = $pdo->prepare(
         "SELECT sub.subject_name, e.exam_name, e.term, e.year, r.marks, r.grade,
                 r.class_teacher_remark, r.subject_teacher_remark
@@ -50,7 +39,6 @@ if ($examId > 0) {
     $stmt->execute([':sid' => $studentId, ':eid' => $examId]);
     $rows = $stmt->fetchAll();
 
-    // Summary.
     $summary['count'] = count($rows);
     foreach ($rows as $r) {
         $summary['total'] += (float)$r['marks'];
@@ -60,7 +48,6 @@ if ($examId > 0) {
         $summary['grade']   = calculate_grade($summary['average']);
     }
 
-    // Position in class.
     $posStmt = $pdo->prepare(
         "WITH exam_avg AS (
              SELECT s.student_id, AVG(r.marks) AS avg_marks
@@ -84,15 +71,12 @@ if ($examId > 0) {
         $summary['class_size'] = (int)$pos['class_size'];
     }
 
-    // Exam label.
     foreach ($exams as $ex) {
         if ((int)$ex['exam_id'] === $examId) {
             $examLabel = $ex['exam_name'] . ' - ' . $ex['term'] . ' ' . $ex['year'];
         }
     }
 }
-
-/** Format a numeric mark without trailing zeros. */
 function fmt_marks($m): string
 {
     return rtrim(rtrim(number_format((float)$m, 2, '.', ''), '0'), '.');
@@ -228,12 +212,10 @@ function downloadPdf() {
         jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
     };
     
-    // Hide buttons during PDF generation
     const noPrint = document.querySelectorAll('.no-print');
     noPrint.forEach(el => el.style.display = 'none');
     
     html2pdf().set(opt).from(element).save().then(() => {
-        // Show buttons again
         noPrint.forEach(el => el.style.display = '');
     });
 }

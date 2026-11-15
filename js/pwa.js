@@ -1,41 +1,17 @@
-/* ==========================================================================
-   js/pwa.js — Green Valley SRMS "app" behaviour (mobile + offline)
-   --------------------------------------------------------------------------
-   Three jobs, all client-side and data-free:
-     1. Register the service worker (service-worker.js) so the site installs
-        to a phone home screen and survives going offline.
-     2. Drive the mobile navigation drawer (the hamburger button in the top bar
-        opens/closes the sidebar on small screens).
-     3. On sign-out, tell the service worker to wipe cached pages so student
-        records don't linger on a shared device. Also offer an "Install app"
-        button when the browser says the app is installable.
-
-   No database access, no credentials — this only talks to the browser.
-   ========================================================================== */
 (function () {
   'use strict';
-
-  /* ---------------------------------------------------------------------- *
-   * 1. Service worker registration
-   * ---------------------------------------------------------------------- */
   if ('serviceWorker' in navigator && location.protocol !== 'file:') {
     window.addEventListener('load', function () {
       navigator.serviceWorker.register('service-worker.js').catch(function (err) {
-        // Not fatal — the app still works online without offline support.
         console.warn('[PWA] Service worker registration failed:', err);
       });
     });
   }
-
-  /* ---------------------------------------------------------------------- *
-   * 2. Mobile navigation drawer
-   * ---------------------------------------------------------------------- */
   function initDrawer() {
     var sidebar = document.getElementById('sidebar');
     var toggle = document.querySelector('.nav-toggle');
     if (!sidebar || !toggle) return;
 
-    // Backdrop sits behind the drawer and closes it when tapped.
     var backdrop = document.createElement('div');
     backdrop.className = 'nav-backdrop';
     document.body.appendChild(backdrop);
@@ -61,25 +37,18 @@
     });
     backdrop.addEventListener('click', closeNav);
 
-    // Tapping any nav link closes the drawer as the new page loads.
     sidebar.addEventListener('click', function (e) {
       if (e.target.closest('a')) closeNav();
     });
 
-    // Escape closes it; keeps keyboard users unstuck.
     document.addEventListener('keydown', function (e) {
       if (e.key === 'Escape' && isOpen()) closeNav();
     });
 
-    // If the window grows back to desktop width, reset the drawer state.
     window.addEventListener('resize', function () {
       if (window.innerWidth > 860 && isOpen()) closeNav();
     });
   }
-
-  /* ---------------------------------------------------------------------- *
-   * 3a. Clear cached pages on sign-out (shared-device privacy)
-   * ---------------------------------------------------------------------- */
   function initLogoutPurge() {
     document.addEventListener('click', function (e) {
       var a = e.target.closest('a[href]');
@@ -92,10 +61,6 @@
       }
     });
   }
-
-  /* ---------------------------------------------------------------------- *
-   * 3b. "Install app" button (appears only when the browser allows it)
-   * ---------------------------------------------------------------------- */
   function initInstallButton() {
     var deferredPrompt = null;
     var btn = null;
@@ -135,8 +100,6 @@
       hide();
     });
   }
-
-  /* ---------------------------------------------------------------------- */
   function init() {
     initDrawer();
     initLogoutPurge();

@@ -1,29 +1,15 @@
 <?php
-/**
- * login.php
- * ---------------------------------------------------------------------------
- * Dual-panel login page: Staff/Admin and Student portals on one screen with
- * a sliding overlay animation. Replaces the old single-panel login.php.
- * ---------------------------------------------------------------------------
- */
-
 declare(strict_types=1);
 
 require_once __DIR__ . '/includes/auth.php';
 require_once __DIR__ . '/includes/student_portal.php';
 
-// Already signed in? Go straight to the appropriate dashboard.
 if (is_logged_in()) {
     redirect('dashboard.php');
 }
 if (is_student()) {
     redirect('student_home.php');
 }
-
-/* ------------------------------------------------------------------------ */
-/* Staff / Admin login handling                                             */
-/* ------------------------------------------------------------------------ */
-
 $staffError = '';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['staff_login'])) {
@@ -71,11 +57,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['staff_login'])) {
         $staffError = 'Invalid username or password.';
     }
 }
-
-/* ------------------------------------------------------------------------ */
-/* Student portal login handling                                            */
-/* ------------------------------------------------------------------------ */
-
 $studentError = '';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['student_login'])) {
@@ -159,7 +140,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['student_login'])) {
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
     <style>
-        /* --- CSS RESET & BASE STYLES --- */
         * {
             box-sizing: border-box;
             margin: 0;
@@ -176,8 +156,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['student_login'])) {
             padding: 20px;
             color: #334155;
         }
-
-        /* --- MAIN CONTAINER --- */
         .slide-container {
             position: relative;
             width: 1000px;
@@ -189,8 +167,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['student_login'])) {
             overflow: hidden;
             display: flex;
         }
-
-        /* --- FORM PANELS --- */
         .form-box {
             position: absolute;
             top: 0;
@@ -202,21 +178,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['student_login'])) {
             justify-content: center;
             transition: all 0.6s ease-in-out;
         }
-
-        /* Student Form (Left Side) */
         .student-box {
             left: 0;
             z-index: 2;
         }
-
-        /* Staff/Admin Form (Right Side) */
         .staff-box {
             left: 0;
             opacity: 0;
             z-index: 1;
         }
-
-        /* Active state when shifted */
         .slide-container.panel-active .student-box {
             transform: translateX(100%);
             opacity: 0;
@@ -228,8 +198,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['student_login'])) {
             opacity: 1;
             z-index: 5;
         }
-
-        /* --- SLIDING OVERLAY PANEL --- */
         .overlay-container {
             position: absolute;
             top: 0;
@@ -294,8 +262,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['student_login'])) {
         .slide-container.panel-active .overlay-right {
             transform: translateX(20%);
         }
-
-        /* --- TYPOGRAPHY & ELEMENTS --- */
         .form-header {
             margin-bottom: 28px;
         }
@@ -425,8 +391,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['student_login'])) {
         .forgot-link:hover {
             text-decoration: underline;
         }
-
-        /* --- BUTTONS --- */
         .btn-submit {
             width: 100%;
             padding: 13px;
@@ -476,8 +440,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['student_login'])) {
             line-height: 1.5;
             opacity: 0.9;
         }
-
-        /* --- ALERT STYLES --- */
         .alert {
             padding: 10px 14px;
             border-radius: 10px;
@@ -495,8 +457,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['student_login'])) {
             color: #166534;
             border: 1px solid #bbf7d0;
         }
-
-        /* --- EXTRA LINKS --- */
         .form-extra {
             margin-top: 16px;
             text-align: center;
@@ -511,8 +471,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['student_login'])) {
         .form-extra a:hover {
             text-decoration: underline;
         }
-
-        /* --- RESPONSIVE MOBILE STYLES --- */
         @media (max-width: 768px) {
             .slide-container {
                 min-height: auto;
@@ -698,7 +656,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['student_login'])) {
   <script>
     const slideContainer = document.getElementById('slideContainer');
 
-    // Toggle sliding panel state
     function togglePanel(isStaff) {
       if (isStaff) {
         slideContainer.classList.add('panel-active');
@@ -707,7 +664,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['student_login'])) {
       }
     }
 
-    // Toggle password input visibility
     function togglePassword(inputId, icon) {
       const input = document.getElementById(inputId);
       if (input.type === 'password') {

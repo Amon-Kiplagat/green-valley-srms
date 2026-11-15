@@ -1,14 +1,4 @@
 <?php
-/**
- * reports.php
- * ---------------------------------------------------------------------------
- * Academic reports generated live from the students, subjects, exams and
- * results tables (no duplicated report data is stored). Pick a student and an
- * examination to produce a complete, printable report with subject marks,
- * grades, totals, average and overall grade. Replaces reports.html.
- * ---------------------------------------------------------------------------
- */
-
 declare(strict_types=1);
 
 require_once __DIR__ . '/includes/auth.php';
@@ -33,7 +23,6 @@ $summary = ['count' => 0, 'total' => 0.0, 'average' => 0.0, 'grade' => '', 'posi
 $examLabel = '';
 
 if ($studentId > 0) {
-    // Student header info including class name.
     $stmt = $pdo->prepare(
         "SELECT s.admission_no, s.full_name, s.gender, c.class_name
            FROM students s
@@ -43,7 +32,6 @@ if ($studentId > 0) {
     $stmt->execute([':id' => $studentId]);
     $student = $stmt->fetch();
 
-    // Marks by subject for the chosen exam (or all exams if none selected).
     $sql = "SELECT sub.subject_name, e.exam_name, e.term, e.year, r.marks, r.grade
               FROM results r
               JOIN subjects sub ON sub.subject_id = r.subject_id
@@ -63,7 +51,6 @@ if ($studentId > 0) {
     $stmt->execute($params);
     $rows = $stmt->fetchAll();
 
-    // Summary figures (computed, not stored).
     $summary['count'] = count($rows);
     foreach ($rows as $r) {
         $summary['total'] += (float)$r['marks'];
@@ -73,7 +60,6 @@ if ($studentId > 0) {
         $summary['grade']   = calculate_grade($summary['average']);
     }
 
-    // Position in class for a specific exam (ranked by average marks).
     if ($examId > 0 && $student) {
         $posStmt = $pdo->prepare(
             "WITH exam_avg AS (
@@ -109,8 +95,6 @@ if ($studentId > 0) {
         $examLabel = 'All Examinations';
     }
 }
-
-/** Format a numeric mark without trailing zeros. */
 function fmt_marks($m): string
 {
     return rtrim(rtrim(number_format((float)$m, 2, '.', ''), '0'), '.');
@@ -202,22 +186,18 @@ require_once __DIR__ . '/includes/header.php';
 
     function getFilteredStudents() {
         var students = allStudents;
-        // Filter by class
         if (filterClassId > 0) {
             students = students.filter(function(s) { return parseInt(s.class_id) === filterClassId; });
         }
         return students;
     }
 
-    // Initial load with server-side filters applied
     populateList(getFilteredStudents());
 
-    // Restore selected value after populate
     if (selectedId > 0) {
         selectEl.value = selectedId;
     }
 
-    // Filter on type (search box)
     searchInput.addEventListener('input', function() {
         var q = this.value.toLowerCase().trim();
         var base = getFilteredStudents();
@@ -235,7 +215,6 @@ require_once __DIR__ . '/includes/header.php';
         populateList(filtered);
     });
 
-    // Auto-clear search when a student is selected
     selectEl.addEventListener('change', function() {
         if (this.value) {
             var chosen = allStudents.find(function(s) { return parseInt(s.student_id) === parseInt(this.value); }.bind(this));

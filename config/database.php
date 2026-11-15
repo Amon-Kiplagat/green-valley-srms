@@ -1,22 +1,8 @@
 <?php
-/**
- * config/database.php
- * ---------------------------------------------------------------------------
- * Secure PDO connection to PostgreSQL for Green Valley SRMS.
- *
- * Credentials are read from a .env file (or real environment variables) so that
- * no sensitive values are hard-coded here or exposed to HTML/JavaScript.
- *
- * Returns a shared PDO instance via db() so every page reuses one connection.
- * ---------------------------------------------------------------------------
- */
 
 declare(strict_types=1);
 
-/**
- * Minimal .env loader (no external dependencies).
- * Populates getenv()/$_ENV with KEY=VALUE pairs from the given file, once.
- */
+// Load .env file once, populate getenv() and $_ENV.
 function load_env(string $path): void
 {
     static $loaded = false;
@@ -26,13 +12,13 @@ function load_env(string $path): void
     $loaded = true;
 
     if (!is_readable($path)) {
-        return; // Fall back to real environment variables if no .env file.
+        return;
     }
 
     foreach (file($path, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES) as $line) {
         $line = trim($line);
         if ($line === '' || $line[0] === '#') {
-            continue; // skip blank lines and comments
+            continue;
         }
         if (!str_contains($line, '=')) {
             continue;
@@ -41,12 +27,10 @@ function load_env(string $path): void
         $key   = trim($key);
         $value = trim($value);
 
-        // Strip an inline comment that is not inside quotes.
         if ($value !== '' && $value[0] !== '"' && $value[0] !== "'") {
             $value = preg_split('/\s+#/', $value)[0];
             $value = trim($value);
         }
-        // Strip surrounding quotes if present.
         if (strlen($value) >= 2
             && (($value[0] === '"' && substr($value, -1) === '"')
                 || ($value[0] === "'" && substr($value, -1) === "'"))) {
@@ -60,9 +44,6 @@ function load_env(string $path): void
     }
 }
 
-/**
- * Read a config value from the environment, with an optional default.
- */
 function env(string $key, ?string $default = null): ?string
 {
     $val = getenv($key);
@@ -72,9 +53,7 @@ function env(string $key, ?string $default = null): ?string
     return $val;
 }
 
-/**
- * Return the shared PDO connection (created on first call).
- */
+// Singleton PDO connection. Reads DATABASE_URL or DB_* env vars.
 function db(): PDO
 {
     static $pdo = null;
@@ -82,12 +61,10 @@ function db(): PDO
         return $pdo;
     }
 
-    // Load .env from the project root (one level up from /config).
     load_env(dirname(__DIR__) . '/.env');
 
     $url = env('DATABASE_URL');
     if ($url !== null) {
-        // Neon / hosted: one connection string, SSL required.
         $u    = parse_url($url);
         $host = $u['host'];
         $port = (string)($u['port'] ?? 5432);
@@ -96,7 +73,6 @@ function db(): PDO
         $pass = urldecode($u['pass'] ?? '');
         $dsn  = sprintf('pgsql:host=%s;port=%s;dbname=%s;sslmode=require', $host, $port, $name);
     } else {
-        // Local development: the DB_* values from your .env file.
         $host = env('DB_HOST', 'localhost');
         $port = env('DB_PORT', '5432');
         $name = env('DB_NAME', 'green_valley');
@@ -106,15 +82,14 @@ function db(): PDO
     }
 
     $options = [
-        PDO::ATTR_ERRMODE            => PDO::ERRMODE_EXCEPTION,   // throw on error
-        PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,         // assoc arrays
-        PDO::ATTR_EMULATE_PREPARES   => false,                   // real prepared stmts
+        PDO::ATTR_ERRMODE            => PDO::ERRMODE_EXCEPTION,
+        PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
+        PDO::ATTR_EMULATE_PREPARES   => false,
     ];
 
     try {
         $pdo = new PDO($dsn, $user, $pass, $options);
     } catch (PDOException $e) {
-        // Do not leak credentials/details in production.
         if (env('APP_ENV', 'production') === 'development') {
             die('Database connection failed: ' . htmlspecialchars($e->getMessage(), ENT_QUOTES, 'UTF-8'));
         }

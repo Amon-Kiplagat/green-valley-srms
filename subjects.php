@@ -1,13 +1,4 @@
 <?php
-/**
- * subjects.php
- * ---------------------------------------------------------------------------
- * Subject management: add, view, edit, delete, and assign a teacher
- * (subjects.teacher_id -> teachers.teacher_id). Admin-only management.
- * Replaces subjects.html.
- * ---------------------------------------------------------------------------
- */
-
 declare(strict_types=1);
 
 require_once __DIR__ . '/includes/auth.php';

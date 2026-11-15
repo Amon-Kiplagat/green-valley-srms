@@ -1,16 +1,8 @@
 <?php
-/**
- * signup.php
- * ---------------------------------------------------------------------------
- * Teacher self-signup page. Creates a new teacher record and user account.
- * ---------------------------------------------------------------------------
- */
-
 declare(strict_types=1);
 
 require_once __DIR__ . '/includes/auth.php';
 
-// Already signed in?
 if (is_logged_in()) {
     redirect('dashboard.php');
 }
@@ -35,13 +27,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     } else {
         $pdo = db();
 
-        // Check if username exists
         $stmt = $pdo->prepare('SELECT user_id FROM users WHERE username = :u');
         $stmt->execute([':u' => $username]);
         if ($stmt->fetch()) {
             $error = 'Username already taken.';
         } else {
-            // Insert teacher
             $pdo->prepare(
                 'INSERT INTO teachers (full_name, email, phone, is_active)
                  VALUES (:name, :email, :phone, TRUE)'
@@ -52,7 +42,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             ]);
             $teacherId = (int)$pdo->lastInsertId('teacher_id');
 
-            // Insert user
             $hash = password_hash($password, PASSWORD_DEFAULT);
             $pdo->prepare(
                 'INSERT INTO users (username, password_hash, full_name, role, teacher_id, email, phone, is_active)

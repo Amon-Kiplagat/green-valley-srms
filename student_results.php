@@ -1,11 +1,4 @@
 <?php
-/**
- * student_results.php
- * ---------------------------------------------------------------------------
- * Student portal — view, print and download exam results.
- * ---------------------------------------------------------------------------
- */
-
 declare(strict_types=1);
 
 require_once __DIR__ . '/includes/auth.php';
@@ -14,7 +7,6 @@ require_student();
 
 $pdo = db();
 
-// Student info for the report header.
 $stmt = $pdo->prepare(
     'SELECT s.full_name, s.admission_no, s.gender, c.class_name
        FROM students s
@@ -24,7 +16,6 @@ $stmt = $pdo->prepare(
 $stmt->execute([':id' => $_SESSION['student_id']]);
 $studentInfo = $stmt->fetch();
 
-// All results for the student.
 $stmt = $pdo->prepare(
     'SELECT sub.subject_name, e.exam_name, e.term, e.year,
             r.marks, r.grade, r.class_teacher_remark, r.subject_teacher_remark
@@ -37,7 +28,6 @@ $stmt = $pdo->prepare(
 $stmt->execute([':id' => $_SESSION['student_id']]);
 $results = $stmt->fetchAll();
 
-// Group results by exam for summary.
 $exams = [];
 foreach ($results as $row) {
     $key = $row['exam_name'] . ' - ' . $row['term'] . ' ' . $row['year'];
@@ -54,14 +44,12 @@ foreach ($exams as &$ex) {
 }
 unset($ex);
 
-// Handle CSV download.
 if (isset($_GET['download']) && $_GET['download'] === 'csv' && $results) {
     header('Content-Type: text/csv; charset=utf-8');
     header('Content-Disposition: attachment; filename="'
         . preg_replace('/[^a-zA-Z0-9]/', '_', $studentInfo['full_name'] ?? 'student')
         . '_results.csv');
     $out = fopen('php://output', 'w');
-    // BOM for Excel UTF-8 compatibility.
     fprintf($out, "\xEF\xBB\xBF");
     fputcsv($out, ['Subject', 'Exam', 'Term', 'Year', 'Marks', 'Grade', 'Remark']);
     foreach ($results as $row) {
@@ -177,7 +165,6 @@ require_once __DIR__ . '/includes/header.php';
 </div>
 
 <style>
-/* Print-friendly styles */
 @media print {
     .sidebar, .topbar, .app-foot, .no-print, .nav-toggle, .nav-backdrop {
         display: none !important;
@@ -246,8 +233,6 @@ require_once __DIR__ . '/includes/header.php';
         font-weight: 700;
     }
 }
-
-/* Screen styles for report */
 .report-header {
     text-align: center;
     border-bottom: 2px solid #e2e8f0;
@@ -348,12 +333,10 @@ function downloadPdf() {
         jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
     };
     
-    // Hide buttons during PDF generation
     const noPrint = document.querySelectorAll('.no-print');
     noPrint.forEach(el => el.style.display = 'none');
     
     html2pdf().set(opt).from(element).save().then(() => {
-        // Show buttons again
         noPrint.forEach(el => el.style.display = '');
     });
 }

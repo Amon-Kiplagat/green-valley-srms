@@ -1,22 +1,11 @@
 <?php
-/**
- * dashboard.php
- * ---------------------------------------------------------------------------
- * Landing page after login. Shows live counts pulled from PostgreSQL and the
- * most recent marks entered. Replaces dashboard.html.
- * ---------------------------------------------------------------------------
- */
-
 declare(strict_types=1);
 
 require_once __DIR__ . '/includes/auth.php';
 require_login();
 
 $pdo = db();
-
-/** Small helper to fetch a single COUNT(*) value. */
 $count = static function (string $table) use ($pdo): int {
-    // Table name is a hard-coded literal (never user input), so it is safe here.
     return (int)$pdo->query("SELECT COUNT(*) FROM {$table}")->fetchColumn();
 };
 
@@ -26,7 +15,6 @@ $totalClasses  = $count('classes');
 $totalSubjects = $count('subjects');
 $totalExams    = $count('exams');
 
-// Most recent marks entered (real data, joined across tables).
 $recent = $pdo->query(
     "SELECT s.full_name AS student, sub.subject_name AS subject,
             e.exam_name, e.term, e.year, r.marks, r.grade, r.created_at

@@ -1,22 +1,11 @@
 <?php
-/**
- * includes/sidebar.php
- * ---------------------------------------------------------------------------
- * Left navigation (redesigned). Links are unchanged; they still point at the
- * .php pages and the active page is highlighted via $navClass(). Nav is now
- * grouped (Overview / Records / Assessment) with icons, and the signed-in
- * user + logout sit in the sidebar footer.
- * ---------------------------------------------------------------------------
- */
 
 $current = basename($_SERVER['PHP_SELF'] ?? '');
 
-/** Helper: mark a nav link active when it matches the current page. */
 $navClass = static function (string $file) use ($current): string {
     return $file === $current ? 'active' : '';
 };
 
-/** Font Awesome icon class for a nav item. */
 $navIcon = static function (string $key): string {
     $icons = [
         'dashboard' => 'fa-solid fa-table-columns',
@@ -34,7 +23,6 @@ $navIcon = static function (string $key): string {
     return '<i class="' . $icon . '" aria-hidden="true"></i>';
 };
 
-/** Nav structure: group label => [ file => [label, icon-key] ]. */
 $loggedIn = function_exists('is_logged_in') && is_logged_in();
 $isStudent = function_exists('is_student') && is_student();
 $hasSession = $loggedIn || $isStudent;
@@ -45,7 +33,6 @@ $userRole = $loggedIn
     ? (function_exists('current_role') ? (string)(current_role() ?? '') : '')
     : ($isStudent ? 'Student' : '');
 
-/** Student portal nav: only Dashboard, Exams, Results, Reports, Profile. */
 $studentNav = [
     'student_home.php'      => ['Dashboard', 'dashboard'],
     'student_exams.php'     => ['Exams',     'exams'],
@@ -54,10 +41,8 @@ $studentNav = [
     'student_password.php'  => ['Profile',   'profile'],
 ];
 
-/** Check if current user is admin. */
 $isAdmin = $loggedIn && function_exists('current_role') && current_role() === 'admin';
 
-/** Admin nav: full navigation — admin oversees everything. */
 $adminNav = [
     'Overview' => [
         'dashboard.php'      => ['Dashboard', 'dashboard'],
@@ -77,7 +62,6 @@ $adminNav = [
     ],
 ];
 
-/** Teacher nav: reduced navigation. */
 $teacherNav = [
     'Overview' => [
         'dashboard.php' => ['Dashboard', 'dashboard'],

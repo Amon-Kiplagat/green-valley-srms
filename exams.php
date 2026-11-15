@@ -1,13 +1,4 @@
 <?php
-/**
- * exams.php
- * ---------------------------------------------------------------------------
- * Examination management: add, view, edit, delete. Stores exam name, term and
- * year (unique together). Admin-only management. Replaces exams.html.
- * (Marks entry lives on results.php.)
- * ---------------------------------------------------------------------------
- */
-
 declare(strict_types=1);
 
 require_once __DIR__ . '/includes/auth.php';

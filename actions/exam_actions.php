@@ -1,11 +1,4 @@
 <?php
-/**
- * actions/exam_actions.php
- * ---------------------------------------------------------------------------
- * Server-side handler for exams CRUD.
- * Called via POST from exams.php.
- * ---------------------------------------------------------------------------
- */
 
 declare(strict_types=1);
 
@@ -15,9 +8,6 @@ require_login();
 $pdo = db();
 $action = (string)($_POST['action'] ?? $_GET['action'] ?? '');
 
-/* ------------------------------------------------------------------ */
-/* DELETE (via GET with CSRF token in URL)                             */
-/* ------------------------------------------------------------------ */
 if ($action === 'delete') {
     require_role('admin');
     verify_csrf();
@@ -28,7 +18,6 @@ if ($action === 'delete') {
         redirect('exams.php');
     }
 
-    // Fetch context for audit log.
     $stmt = $pdo->prepare('SELECT exam_name, term, year FROM exams WHERE exam_id = :id');
     $stmt->execute([':id' => $examId]);
     $row = $stmt->fetch();
@@ -38,7 +27,6 @@ if ($action === 'delete') {
         redirect('exams.php');
     }
 
-    // Check if this exam has results.
     $stmt = $pdo->prepare('SELECT COUNT(*) AS cnt FROM results WHERE exam_id = :id');
     $stmt->execute([':id' => $examId]);
     $cnt = $stmt->fetch()['cnt'];
@@ -57,9 +45,6 @@ if ($action === 'delete') {
     redirect('exams.php');
 }
 
-/* ------------------------------------------------------------------ */
-/* POST actions: create / update                                      */
-/* ------------------------------------------------------------------ */
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     http_response_code(405);
     die('Method not allowed.');
@@ -74,7 +59,6 @@ if ($action === 'create' || $action === 'update') {
     $term      = trim($_POST['term'] ?? '');
     $year      = (int)($_POST['year'] ?? 0);
 
-    // Validation.
     if ($examName === '') {
         set_flash('error', 'Exam name is required.');
         redirect('exams.php');
@@ -91,7 +75,7 @@ if ($action === 'create' || $action === 'update') {
     }
 
     if ($action === 'create') {
-        // Check for duplicate.
+        // Duplicate check.
         $stmt = $pdo->prepare(
             'SELECT exam_id FROM exams
                WHERE exam_name = :name AND term = :term AND year = :year
@@ -142,8 +126,5 @@ if ($action === 'create' || $action === 'update') {
     redirect('exams.php');
 }
 
-/* ------------------------------------------------------------------ */
-/* Fallback                                                           */
-/* ------------------------------------------------------------------ */
 set_flash('error', 'Unknown action.');
 redirect('exams.php');

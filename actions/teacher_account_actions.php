@@ -1,12 +1,4 @@
 <?php
-/**
- * actions/teacher_account_actions.php
- * ---------------------------------------------------------------------------
- * Server-side handler for teacher account management.
- * Called via POST/GET from teacher_accounts.php.
- * Handles: create_account, reset_password, activate, deactivate.
- * ---------------------------------------------------------------------------
- */
 
 declare(strict_types=1);
 
@@ -16,9 +8,6 @@ require_role('admin');
 $pdo = db();
 $action = (string)($_POST['action'] ?? $_GET['action'] ?? '');
 
-/* ------------------------------------------------------------------ */
-/* ACTIVATE / DEACTIVATE (via GET with CSRF token in URL)              */
-/* ------------------------------------------------------------------ */
 if ($action === 'activate' || $action === 'deactivate') {
     verify_csrf();
 
@@ -28,7 +17,6 @@ if ($action === 'activate' || $action === 'deactivate') {
         redirect('teacher_accounts.php');
     }
 
-    // Find the user account linked to this teacher.
     $stmt = $pdo->prepare(
         'SELECT u.user_id, u.username, t.full_name
            FROM users u
@@ -57,9 +45,6 @@ if ($action === 'activate' || $action === 'deactivate') {
     redirect('teacher_accounts.php');
 }
 
-/* ------------------------------------------------------------------ */
-/* POST actions                                                        */
-/* ------------------------------------------------------------------ */
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     http_response_code(405);
     die('Method not allowed.');
@@ -67,16 +52,12 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 
 verify_csrf();
 
-/* ------------------------------------------------------------------ */
-/* CREATE ACCOUNT                                                      */
-/* ------------------------------------------------------------------ */
 if ($action === 'create_account') {
     $teacherId = (int)($_POST['teacher_id'] ?? 0);
     $username  = trim((string)($_POST['username'] ?? ''));
     $password  = (string)($_POST['password'] ?? '');
     $confirm   = (string)($_POST['confirm'] ?? '');
 
-    // Validation.
     if ($teacherId <= 0) {
         set_flash('error', 'Invalid teacher ID.');
         redirect('teacher_accounts.php');
@@ -97,7 +78,6 @@ if ($action === 'create_account') {
         redirect('teacher_accounts.php');
     }
 
-    // Check if this teacher already has an account.
     $stmt = $pdo->prepare(
         'SELECT u.user_id FROM users u WHERE u.teacher_id = :id AND u.role = \'teacher\''
     );
@@ -107,7 +87,6 @@ if ($action === 'create_account') {
         redirect('teacher_accounts.php');
     }
 
-    // Check if username is already taken.
     $stmt = $pdo->prepare('SELECT user_id FROM users WHERE username = :u LIMIT 1');
     $stmt->execute([':u' => $username]);
     if ($stmt->fetch()) {
@@ -115,7 +94,6 @@ if ($action === 'create_account') {
         redirect('teacher_accounts.php');
     }
 
-    // Fetch teacher details.
     $stmt = $pdo->prepare('SELECT full_name, email FROM teachers WHERE teacher_id = :id');
     $stmt->execute([':id' => $teacherId]);
     $teacher = $stmt->fetch();
@@ -125,7 +103,6 @@ if ($action === 'create_account') {
         redirect('teacher_accounts.php');
     }
 
-    // Create the account.
     $hash = password_hash($password, PASSWORD_DEFAULT);
     $stmt = $pdo->prepare(
         'INSERT INTO users (username, password_hash, full_name, email, role, teacher_id, is_active)
@@ -144,9 +121,6 @@ if ($action === 'create_account') {
     redirect('teacher_accounts.php');
 }
 
-/* ------------------------------------------------------------------ */
-/* RESET PASSWORD                                                      */
-/* ------------------------------------------------------------------ */
 if ($action === 'reset_password') {
     $teacherId = (int)($_POST['teacher_id'] ?? 0);
     $password  = (string)($_POST['password'] ?? '');
@@ -167,7 +141,6 @@ if ($action === 'reset_password') {
         redirect('teacher_accounts.php');
     }
 
-    // Find the user account linked to this teacher.
     $stmt = $pdo->prepare(
         'SELECT u.user_id, u.username, t.full_name
            FROM users u
@@ -191,8 +164,5 @@ if ($action === 'reset_password') {
     redirect('teacher_accounts.php');
 }
 
-/* ------------------------------------------------------------------ */
-/* Fallback                                                            */
-/* ------------------------------------------------------------------ */
 set_flash('error', 'Unknown action.');
 redirect('teacher_accounts.php');

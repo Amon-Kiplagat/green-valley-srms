@@ -1,17 +1,4 @@
 <?php
-/**
- * includes/header.php
- * ---------------------------------------------------------------------------
- * Top of every protected page. Renders <head> (links css/js), opens <body>,
- * pulls in the sidebar, and opens the main content area with a top bar.
- *
- * A page should set $page_title before including this file, and may optionally
- * set $page_subtitle for a short line of context under the title:
- *     $page_title    = 'Students';
- *     $page_subtitle = 'Add, search and manage student records';
- *     require_once __DIR__ . '/includes/header.php';
- * ---------------------------------------------------------------------------
- */
 
 if (!isset($page_title)) {
     $page_title = 'Green Valley SRMS';
@@ -19,7 +6,6 @@ if (!isset($page_title)) {
 if (!isset($page_subtitle)) {
     $page_subtitle = '';
 }
-// Auth/functions are expected to be loaded by the page already; be defensive.
 if (!function_exists('e')) {
     require_once __DIR__ . '/functions.php';
 }
@@ -31,16 +17,10 @@ if (!function_exists('e')) {
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title><?= e($page_title) ?> — Green Valley SRMS</title>
     <link rel="stylesheet" href="css/style.css?v=<?= time() ?>">
-
-    <!-- Google Fonts & Font Awesome -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-
-    <!-- Progressive Web App: installable to a phone + works offline.
-         The manifest and icons are static files; the offline behaviour lives
-         in service-worker.js (registered from js/pwa.js). No DB access here. -->
     <meta name="theme-color" content="#4f46e5">
     <meta name="description" content="Student Records Management System for Green Valley Secondary School, Murang'a County.">
     <link rel="manifest" href="manifest.webmanifest">

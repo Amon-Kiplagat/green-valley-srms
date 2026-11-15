@@ -1,33 +1,7 @@
 <?php
-/**
- * create_admin.php
- * ---------------------------------------------------------------------------
- * One-off utility to create or reset a login account with a properly hashed
- * password (uses PHP password_hash(), so it always matches password_verify()).
- *
- * Two ways to run it:
- *
- *  1) Command line (recommended):
- *       php create_admin.php <username> <password> <full name> <role>
- *     e.g.
- *       php create_admin.php admin "StrongPass#1" "System Administrator" admin
- *       php create_admin.php jmwangi "Teach#123" "John Mwangi" teacher
- *
- *  2) Browser: open create_admin.php?setup=1 ONCE to create the default
- *     admin/admin123 account, then DELETE this file.
- *
- *  role must be 'admin' or 'teacher'. If the username exists, its password,
- *  name, and role are updated.
- *
- *  >>> DELETE THIS FILE after you have created your accounts. <<<
- * ---------------------------------------------------------------------------
- */
-
 declare(strict_types=1);
 
 require_once __DIR__ . '/config/database.php';
-
-/** Insert or update a user with a hashed password. */
 function upsert_user(PDO $pdo, string $username, string $password, string $fullName, string $role): void
 {
     if (!in_array($role, ['admin', 'teacher'], true)) {
@@ -49,7 +23,6 @@ function upsert_user(PDO $pdo, string $username, string $password, string $fullN
 $pdo = db();
 
 if (PHP_SAPI === 'cli') {
-    // ---- CLI mode ----
     $args = $argv;
     array_shift($args); // drop script name
     if (count($args) < 4) {
@@ -63,7 +36,6 @@ if (PHP_SAPI === 'cli') {
     exit(0);
 }
 
-// ---- Browser mode ----
 header('Content-Type: text/plain; charset=utf-8');
 if (($_GET['setup'] ?? '') === '1') {
     upsert_user($pdo, 'admin', 'admin123', 'System Administrator', 'admin');
