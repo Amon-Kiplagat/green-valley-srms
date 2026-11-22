@@ -10,14 +10,10 @@ if (is_logged_in()) {
 $token = (string)($_GET['token'] ?? '');
 $error = '';
 $success = '';
-$resetLink = '';
-
 $flashes = get_flashes();
 foreach ($flashes as $flash) {
     if ($flash['type'] === 'error') {
         $error = $flash['message'];
-    } elseif ($flash['type'] === 'info') {
-        $resetLink = $flash['message'];
     } elseif ($flash['type'] === 'success') {
         $success = $flash['message'];
     }
@@ -135,19 +131,6 @@ foreach ($flashes as $flash) {
         .back-link:hover {
             text-decoration: underline;
         }
-        .reset-link-box {
-            background: #f8fafc;
-            border: 2px dashed #6366f1;
-            border-radius: 8px;
-            padding: 12px;
-            margin: 16px 0;
-            word-break: break-all;
-        }
-        .reset-link-box a {
-            color: #6366f1;
-            font-weight: 600;
-            font-size: 13px;
-        }
     </style>
 </head>
 <body>
@@ -163,21 +146,6 @@ foreach ($flashes as $flash) {
             <div class="alert alert-success"><?= htmlspecialchars($success) ?></div>
         <?php endif; ?>
 
-        <?php if ($resetLink !== ''): ?>
-            <div class="alert alert-info">
-                <p style="margin:0 0 8px;font-weight:600;color:#1e293b;">
-                    <i class="fa-solid fa-link"></i> Your password reset link is ready:
-                </p>
-                <div class="reset-link-box">
-                    <a href="<?= htmlspecialchars($resetLink) ?>" target="_blank" style="display:inline-block; background:#22c55e; color:white; padding:12px 24px; border-radius:8px; text-decoration:none; font-weight:700; font-size:15px;">
-                        <i class="fa-solid fa-key"></i> Click Here to Reset Password
-                    </a>
-                </div>
-                <p style="margin:8px 0 0;font-size:12px;color:#64748b;">
-                    Click the button above to open the reset page. The link expires in 1 hour.
-                </p>
-            </div>
-        <?php endif; ?>
 
         <?php if ($token !== ''): ?>
             <!-- Mode 2: Reset form with token -->

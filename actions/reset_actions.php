@@ -63,9 +63,7 @@ if ($action === 'request_reset') {
     if ($emailSent) {
         set_flash('success', 'A password reset link has been sent to kiplamon29@gmail.com. Please check your inbox.');
     } else {
-        // Fallback: show the link on-screen
-        set_flash('success', 'Password reset link generated. Click the link below to reset your password:');
-        set_flash('info', $resetLink);
+        set_flash('error', 'Failed to send the reset email. Please try again later or contact your administrator.');
     }
 
     redirect('reset-password.php');
