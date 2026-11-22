@@ -49,7 +49,7 @@ if ($action === 'request_reset') {
     $baseUrl = rtrim($baseUrl, '/');
     $resetLink = $baseUrl . '/reset-password.php?token=' . $token;
 
-    // Send reset link to admin email
+    // Try to send reset link to admin email
     $emailSent = send_email(
         'kiplamon29@gmail.com',
         'Password Reset Request - Green Valley SRMS',
@@ -63,7 +63,9 @@ if ($action === 'request_reset') {
     if ($emailSent) {
         set_flash('success', 'A password reset link has been sent to kiplamon29@gmail.com. Please check your inbox.');
     } else {
-        set_flash('error', 'Failed to send the reset email. Please try again later.');
+        // Fallback: show the link on-screen
+        set_flash('success', 'Password reset link generated. Click the link below to reset your password:');
+        set_flash('info', $resetLink);
     }
 
     redirect('reset-password.php');
