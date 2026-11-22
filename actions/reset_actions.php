@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 require_once __DIR__ . '/../includes/auth.php';
+require_once __DIR__ . '/../includes/mail.php';
 
 $pdo = db();
 $action = (string)($_POST['action'] ?? '');
@@ -48,8 +49,24 @@ if ($action === 'request_reset') {
     $baseUrl = rtrim($baseUrl, '/');
     $resetLink = $baseUrl . '/reset-password.php?token=' . $token;
 
-    set_flash('success', 'Password reset link generated for ' . htmlspecialchars($user['full_name']) . '. Click the link below to reset your password:');
-    set_flash('info', $resetLink);
+    // Try to send the reset link via email
+    $emailSent = send_email(
+        $user['email'],
+        'Password Reset Request - Green Valley SRMS',
+        "Hello {$user['full_name']},\n\n"
+        . "You requested a password reset for your Green Valley SRMS account.\n"
+        . "Click the link below to reset your password:\n\n"
+        . $resetLink . "\n\n"
+        . "This link expires in 1 hour. If you did not request this, ignore this email.\n"
+    );
+
+    if ($emailSent) {
+        set_flash('success', 'A password reset link has been sent to ' . htmlspecialchars($user['email']) . '. Please check your inbox.');
+    } else {
+        // Fallback: show the link on-screen
+        set_flash('success', 'Password reset link generated. Click the link below to reset your password:');
+        set_flash('info', $resetLink);
+    }
 
     redirect('reset-password.php');
 }
