@@ -1,7 +1,7 @@
 # Render-compatible Dockerfile for Green Valley SRMS
 # Uses Nginx + PHP-FPM for proper file serving (php -S has routing issues with subdirectories)
 # Render sets the $PORT environment variable at runtime
-# Updated: 2026-11-23 - fix reset password flash messages
+# Updated: 2026-11-23 02:00 - add email sending to password reset
 
 FROM php:8.3-fpm
 
