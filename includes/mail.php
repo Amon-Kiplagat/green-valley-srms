@@ -34,7 +34,7 @@ function send_email(string $to, string $subject, string $body): bool
 
     // Fallback credentials for Render deployment
     $host = $getEnv('SMTP_HOST', 'smtp.gmail.com');
-    $port = (int)$getEnv('SMTP_PORT', 587);
+    $port = (int)$getEnv('SMTP_PORT', 465);
     $user = $getEnv('SMTP_USER', 'kiplagatamon22@gmail.com');
     $pass = $getEnv('SMTP_PASS', 'kyqv xmpn tyex lfbk');
     $from = $getEnv('SMTP_FROM', 'kiplagatamon22@gmail.com');
@@ -52,7 +52,7 @@ function send_email(string $to, string $subject, string $body): bool
             $mail->SMTPAuth = true;
             $mail->Username = $user;
             $mail->Password = $pass;
-            $mail->SMTPSecure = \PHPMailer\PHPMailer\PHPMailer::ENCRYPTION_STARTTLS;
+            $mail->SMTPSecure = \PHPMailer\PHPMailer\PHPMailer::ENCRYPTION_SMTPS;
             $mail->Port = $port;
             $mail->Timeout = 15;
             $mail->SMTPAutoTLS = false;
