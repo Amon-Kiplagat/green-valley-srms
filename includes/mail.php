@@ -36,7 +36,7 @@ function send_email(string $to, string $subject, string $body): bool
     $host = $getEnv('SMTP_HOST', 'smtp.gmail.com');
     $port = (int)$getEnv('SMTP_PORT', 587);
     $user = $getEnv('SMTP_USER', 'kiplagatamon22@gmail.com');
-    $pass = $getEnv('SMTP_PASS', 'mhhk gptu exiw lcak');
+    $pass = $getEnv('SMTP_PASS', 'kyqv xmpn tyex lfbk');
     $from = $getEnv('SMTP_FROM', 'kiplagatamon22@gmail.com');
     $fromName = $getEnv('SMTP_FROM_NAME', 'Green Valley SRMS');
     if ($from === '') $from = $user;
