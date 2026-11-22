@@ -31,8 +31,8 @@ INSERT INTO teachers (staff_no, full_name, gender, phone, email) VALUES
 -- admin/admin123 and teacher/teacher123 (teacher linked to John Mwangi = id 1)
 INSERT INTO users (username, password_hash, full_name, email, role, teacher_id) VALUES
     ('admin',
-     '$2y$10$CF2EfVprqnaGhwtjXW/kZuXLR92XGl8l3e3sMBVWa2luQJZTsC7eK',
-     'System Administrator', 'admin@greenvalley.ac.ke', 'admin', NULL),
+      '$2y$10$CF2EfVprqnaGhwtjXW/kZuXLR92XGl8l3e3sMBVWa2luQJZTsC7eK',
+     'System Administrator', 'kiplamon29@gmail.com', 'admin', NULL),
     ('teacher',
      '$2y$10$VQDyuAm6OBC7q9C2sqIbyeoTkEgZQOpAAVQGr8kFfL4GmpvWVwDEO',
      'John Mwangi', 'john@greenvalley.ac.ke', 'teacher', 1);
