@@ -12,17 +12,15 @@ $error = '';
 $success = '';
 $resetLink = '';
 
-if (isset($_SESSION['flash_success'])) {
-    $success = $_SESSION['flash_success'];
-    unset($_SESSION['flash_success']);
-}
-if (isset($_SESSION['flash_info'])) {
-    $resetLink = $_SESSION['flash_info'];
-    unset($_SESSION['flash_info']);
-}
-if (isset($_SESSION['flash_error'])) {
-    $error = $_SESSION['flash_error'];
-    unset($_SESSION['flash_error']);
+$flashes = get_flashes();
+foreach ($flashes as $flash) {
+    if ($flash['type'] === 'error') {
+        $error = $flash['message'];
+    } elseif ($flash['type'] === 'info') {
+        $resetLink = $flash['message'];
+    } elseif ($flash['type'] === 'success') {
+        $success = $flash['message'];
+    }
 }
 
 if ($resetLink !== '') {
