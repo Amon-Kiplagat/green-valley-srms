@@ -27,17 +27,19 @@ function parse_env_file(string $path): array
 function send_email(string $to, string $subject, string $body): bool
 {
     $env = parse_env_file(__DIR__ . '/../.env');
-    $getEnv = function(string $key, $default = '') {
-        $val = $_ENV[$key] ?? $_SERVER[$key] ?? getenv($key) ?? $default;
+    $getEnv = function(string $key, $default = '') use ($env) {
+        $val = $_ENV[$key] ?? $_SERVER[$key] ?? getenv($key) ?? $env[$key] ?? $default;
         return $val ?: $default;
     };
 
-    $host = $getEnv('SMTP_HOST', $env['SMTP_HOST'] ?? '');
-    $port = (int)$getEnv('SMTP_PORT', $env['SMTP_PORT'] ?? 587);
-    $user = $getEnv('SMTP_USER', $env['SMTP_USER'] ?? '');
-    $pass = $getEnv('SMTP_PASS', $env['SMTP_PASS'] ?? '');
-    $from = $getEnv('SMTP_FROM', $env['SMTP_FROM'] ?? $user);
-    $fromName = $getEnv('SMTP_FROM_NAME', $env['SMTP_FROM_NAME'] ?? 'Green Valley SRMS');
+    // Fallback credentials for Render deployment
+    $host = $getEnv('SMTP_HOST', 'smtp.gmail.com');
+    $port = (int)$getEnv('SMTP_PORT', 587);
+    $user = $getEnv('SMTP_USER', 'kiplagatamon22@gmail.com');
+    $pass = $getEnv('SMTP_PASS', 'mhhk gptu exiw lcak');
+    $from = $getEnv('SMTP_FROM', 'kiplagatamon22@gmail.com');
+    $fromName = $getEnv('SMTP_FROM_NAME', 'Green Valley SRMS');
+    if ($from === '') $from = $user;
 
     $autoload = __DIR__ . '/../vendor/autoload.php';
     if (file_exists($autoload) && $host !== '' && $user !== '' && $pass !== '') {
