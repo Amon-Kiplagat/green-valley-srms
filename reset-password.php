@@ -16,15 +16,9 @@ $flashes = get_flashes();
 foreach ($flashes as $flash) {
     if ($flash['type'] === 'error') {
         $error = $flash['message'];
-    } elseif ($flash['type'] === 'info') {
-        $resetLink = $flash['message'];
     } elseif ($flash['type'] === 'success') {
         $success = $flash['message'];
     }
-}
-
-if ($resetLink !== '') {
-    $success = 'Your password reset link is ready. Click the link below to reset your password:';
 }
 ?>
 <!DOCTYPE html>
@@ -165,22 +159,6 @@ if ($resetLink !== '') {
 
         <?php if ($success !== ''): ?>
             <div class="alert alert-success"><?= htmlspecialchars($success) ?></div>
-        <?php endif; ?>
-
-        <?php if ($resetLink !== ''): ?>
-            <div class="alert alert-info">
-                <p style="margin:0 0 8px;font-weight:600;color:#1e293b;">
-                    <i class="fa-solid fa-link"></i> Your password reset link is ready:
-                </p>
-                <div class="reset-link-box">
-                    <a href="<?= htmlspecialchars($resetLink) ?>" target="_blank" style="display:inline-block; background:#22c55e; color:white; padding:12px 24px; border-radius:8px; text-decoration:none; font-weight:700; font-size:15px;">
-                        <i class="fa-solid fa-key"></i> Click Here to Reset Password
-                    </a>
-                </div>
-                <p style="margin:8px 0 0;font-size:12px;color:#64748b;">
-                    Click the button above to open the reset page. The link expires in 1 hour.
-                </p>
-            </div>
         <?php endif; ?>
 
         <?php if ($token !== ''): ?>
