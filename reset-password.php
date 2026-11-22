@@ -10,10 +10,13 @@ if (is_logged_in()) {
 $token = (string)($_GET['token'] ?? '');
 $error = '';
 $success = '';
+$resetLink = '';
 $flashes = get_flashes();
 foreach ($flashes as $flash) {
     if ($flash['type'] === 'error') {
         $error = $flash['message'];
+    } elseif ($flash['type'] === 'info') {
+        $resetLink = $flash['message'];
     } elseif ($flash['type'] === 'success') {
         $success = $flash['message'];
     }
@@ -131,6 +134,20 @@ foreach ($flashes as $flash) {
         .back-link:hover {
             text-decoration: underline;
         }
+        .reset-link-btn {
+            display: inline-block;
+            background: #22c55e;
+            color: #fff;
+            padding: 12px 24px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 700;
+            font-size: 15px;
+            margin-top: 8px;
+        }
+        .reset-link-btn:hover {
+            background: #16a34a;
+        }
     </style>
 </head>
 <body>
@@ -146,6 +163,16 @@ foreach ($flashes as $flash) {
             <div class="alert alert-success"><?= htmlspecialchars($success) ?></div>
         <?php endif; ?>
 
+        <?php if ($resetLink !== ''): ?>
+            <div style="text-align: center; margin: 16px 0;">
+                <a href="<?= htmlspecialchars($resetLink) ?>" target="_blank" class="reset-link-btn">
+                    <i class="fa-solid fa-key"></i> Click Here to Reset Password
+                </a>
+                <p style="margin: 8px 0 0; font-size: 12px; color: #64748b;">
+                    Click the button above to open the reset page. The link expires in 1 hour.
+                </p>
+            </div>
+        <?php endif; ?>
 
         <?php if ($token !== ''): ?>
             <!-- Mode 2: Reset form with token -->
