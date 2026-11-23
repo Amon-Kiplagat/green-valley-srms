@@ -614,9 +614,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['student_login'])) {
 
         <button type="submit" class="btn-submit" style="background: #7e22ce;">Sign In to Staff Portal</button>
 
-        <div class="form-extra">
-          New teacher? <a href="signup.php">Create an account</a>
-        </div>
 
         <div class="mobile-switch">
           Are you a student?
