@@ -78,10 +78,6 @@ $teacherNav = [
 ];
 ?>
 <aside class="sidebar" id="sidebar">
-    <button class="sidebar-close" type="button" aria-label="Close menu">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-             stroke-linecap="round" stroke-linejoin="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
-    </button>
     <div class="brand">
         <div class="brand-crest" aria-hidden="true">GV</div>
         <div class="brand-name">Green Valley<span>Records System</span></div>

@@ -611,24 +611,6 @@ body.login-page {
         z-index: 50;
     }
     .sidebar.open { transform: translateX(0); }
-    .sidebar-close {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        width: 30px;
-        height: 30px;
-        position: absolute;
-        top: 10px;
-        right: 10px;
-        background: rgba(255,255,255,.12);
-        border: none;
-        border-radius: 6px;
-        color: #fff;
-        cursor: pointer;
-        z-index: 60;
-    }
-    .sidebar-close:hover { background: rgba(255,255,255,.22); }
-    .sidebar-close svg { width: 16px; height: 16px; }
     .nav-backdrop {
         display: block;
         position: fixed;
