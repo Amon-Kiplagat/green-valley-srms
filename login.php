@@ -552,16 +552,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['student_login'])) {
           </div>
         </div>
 
-        <div class="form-options" style="margin-bottom: 18px;">
-          <span></span>
-          <a href="reset-password.php" class="forgot-link">Forgot password?</a>
-        </div>
-
         <button type="submit" class="btn-submit">Sign In as Student</button>
-
-        <div class="form-extra">
-          No account yet? Ask the school office.
-        </div>
 
         <div class="mobile-switch">
           Are you a staff member?
@@ -609,7 +600,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['student_login'])) {
           <label class="remember-me">
             <input type="checkbox"> Remember device
           </label>
-          <a href="reset-password.php" class="forgot-link">Forgot password?</a>
         </div>
 
         <button type="submit" class="btn-submit" style="background: #7e22ce;">Sign In to Staff Portal</button>
