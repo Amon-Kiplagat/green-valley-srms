@@ -34,6 +34,8 @@
         sidebar.classList.contains('open') ? closeSidebar() : openSidebar();
     });
     backdrop.addEventListener('click', closeSidebar);
+    var closeBtn = document.querySelector('.sidebar-close');
+    if(closeBtn) closeBtn.addEventListener('click', closeSidebar);
 })();
 </script>
 </body>
