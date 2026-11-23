@@ -87,43 +87,71 @@ if ($action === 'create' || $action === 'update') {
     }
 
     if ($action === 'create') {
-        $stmt = $pdo->prepare(
-            'INSERT INTO teachers (staff_no, full_name, gender, phone, email)
-             VALUES (:sn, :fn, :g, :ph, :em)
-             RETURNING teacher_id'
-        );
-        $stmt->execute([
-            ':sn' => $staffNo,
-            ':fn' => $fullName,
-            ':g'  => $gender,
-            ':ph' => $phone !== '' ? $phone : null,
-            ':em' => $email !== '' ? $email : null,
-        ]);
-        $newId = (int)$stmt->fetch()['teacher_id'];
-        log_activity('Added', 'Teacher', "$fullName ($staffNo)");
-        set_flash('success', "Teacher $fullName added.");
-        redirect('teachers.php');
+        try {
+            $stmt = $pdo->prepare(
+                'INSERT INTO teachers (staff_no, full_name, gender, phone, email)
+                 VALUES (:sn, :fn, :g, :ph, :em)
+                 RETURNING teacher_id'
+            );
+            $stmt->execute([
+                ':sn' => $staffNo,
+                ':fn' => $fullName,
+                ':g'  => $gender,
+                ':ph' => $phone !== '' ? $phone : null,
+                ':em' => $email !== '' ? $email : null,
+            ]);
+            $newId = (int)$stmt->fetch()['teacher_id'];
+            log_activity('Added', 'Teacher', "$fullName ($staffNo)");
+            set_flash('success', "Teacher $fullName added.");
+            redirect('teachers.php');
+        } catch (\PDOException $e) {
+            $msg = $e->getMessage();
+            if (str_contains($msg, 'teachers_staff_no_key')) {
+                set_flash('error', 'Staff number ' . htmlspecialchars($staffNo) . ' is already in use.');
+            } elseif (str_contains($msg, 'teachers_email_key')) {
+                set_flash('error', 'Email ' . htmlspecialchars($email) . ' is already in use by another teacher.');
+            } elseif (str_contains($msg, 'teachers_phone_check') || str_contains($msg, 'chk_teachers_phone')) {
+                set_flash('error', 'Invalid phone number. Use 10 digits starting with 07 or 01, e.g. 0712345678.');
+            } else {
+                set_flash('error', 'Could not add teacher: ' . htmlspecialchars($msg));
+            }
+            redirect('teachers.php');
+        }
     } else {
-        $stmt = $pdo->prepare(
-            'UPDATE teachers
-               SET staff_no  = :sn,
-                   full_name = :fn,
-                   gender    = :g,
-                   phone     = :ph,
-                   email     = :em
+        try {
+            $stmt = $pdo->prepare(
+                'UPDATE teachers
+                   SET staff_no  = :sn,
+                       full_name = :fn,
+                       gender    = :g,
+                       phone     = :ph,
+                       email     = :em
              WHERE teacher_id = :id'
-        );
-        $stmt->execute([
-            ':sn' => $staffNo,
-            ':fn' => $fullName,
-            ':g'  => $gender,
-            ':ph' => $phone !== '' ? $phone : null,
-            ':em' => $email !== '' ? $email : null,
-            ':id' => $teacherId,
-        ]);
-        log_activity('Updated', 'Teacher', "$fullName ($staffNo)");
-        set_flash('success', "Teacher $fullName updated.");
-        redirect('teachers.php');
+            );
+            $stmt->execute([
+                ':sn' => $staffNo,
+                ':fn' => $fullName,
+                ':g'  => $gender,
+                ':ph' => $phone !== '' ? $phone : null,
+                ':em' => $email !== '' ? $email : null,
+                ':id' => $teacherId,
+            ]);
+            log_activity('Updated', 'Teacher', "$fullName ($staffNo)");
+            set_flash('success', "Teacher $fullName updated.");
+            redirect('teachers.php');
+        } catch (\PDOException $e) {
+            $msg = $e->getMessage();
+            if (str_contains($msg, 'teachers_staff_no_key')) {
+                set_flash('error', 'Staff number ' . htmlspecialchars($staffNo) . ' is already in use.');
+            } elseif (str_contains($msg, 'teachers_email_key')) {
+                set_flash('error', 'Email ' . htmlspecialchars($email) . ' is already in use by another teacher.');
+            } elseif (str_contains($msg, 'teachers_phone_check') || str_contains($msg, 'chk_teachers_phone')) {
+                set_flash('error', 'Invalid phone number. Use 10 digits starting with 07 or 01, e.g. 0712345678.');
+            } else {
+                set_flash('error', 'Could not update teacher: ' . htmlspecialchars($msg));
+            }
+            redirect("teachers.php?edit=$teacherId");
+        }
     }
 }
 
