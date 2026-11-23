@@ -32,11 +32,11 @@ function send_email(string $to, string $subject, string $body): bool
         return $val ?: $default;
     };
 
-    // Fallback credentials for Render deployment
-    $host = $getEnv('SMTP_HOST', 'smtp.gmail.com');
-    $port = (int)$getEnv('SMTP_PORT', 465);
-    $user = $getEnv('SMTP_USER', 'kiplagatamon22@gmail.com');
-    $pass = $getEnv('SMTP_PASS', 'kyqv xmpn tyex lfbk');
+    // Brevo SMTP relay (works on Render free tier)
+    $host = $getEnv('SMTP_HOST', 'smtp-relay.brevo.com');
+    $port = (int)$getEnv('SMTP_PORT', 587);
+    $user = $getEnv('SMTP_USER', '');
+    $pass = $getEnv('SMTP_PASS', '');
     $from = $getEnv('SMTP_FROM', 'kiplagatamon22@gmail.com');
     $fromName = $getEnv('SMTP_FROM_NAME', 'Green Valley SRMS');
     if ($from === '') $from = $user;
@@ -52,7 +52,7 @@ function send_email(string $to, string $subject, string $body): bool
             $mail->SMTPAuth = true;
             $mail->Username = $user;
             $mail->Password = $pass;
-            $mail->SMTPSecure = \PHPMailer\PHPMailer\PHPMailer::ENCRYPTION_SMTPS;
+            $mail->SMTPSecure = \PHPMailer\PHPMailer\PHPMailer::ENCRYPTION_STARTTLS;
             $mail->Port = $port;
             $mail->Timeout = 15;
             $mail->SMTPAutoTLS = false;
